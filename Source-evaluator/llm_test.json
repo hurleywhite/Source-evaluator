@@ -1,0 +1,83 @@
+[
+  {
+    "url": "https://apnews.com/article/xi-jinping-china-president-vote-5e6230d8c881dc17b11a781e832accd1",
+    "final_url": "https://apnews.com/article/xi-jinping-china-president-vote-5e6230d8c881dc17b11a781e832accd1",
+    "domain": "apnews.com",
+    "group_label": "",
+    "intended_use": "B",
+    "relation": "unknown",
+    "fetch_status": "ok",
+    "content_type": "text/html;charset=utf-8",
+    "bytes_downloaded": 1135951,
+    "gating": {
+      "auto_reject": false,
+      "reasons": [],
+      "warnings": [
+        "LLM failed/invalid; fell back to heuristics. (Responses.create() got an unexpected keyword argument 'response_format')"
+      ],
+      "auto_restrict": false,
+      "restrict_reason": ""
+    },
+    "criteria": {
+      "C1": {
+        "score": 1,
+        "reason": "Unknown ownership/control; defaulting to partial independence.",
+        "evidence_quotes": []
+      },
+      "C2": {
+        "score": 1,
+        "reason": "Claim relationship unknown; defaulting to some stake/unknown.",
+        "evidence_quotes": []
+      },
+      "C3": {
+        "score": 1,
+        "reason": "Secondary reporting with references detected.",
+        "evidence_quotes": []
+      },
+      "C4": {
+        "score": 0,
+        "reason": "No method/verification described.",
+        "evidence_quotes": []
+      },
+      "C5": {
+        "score": 2,
+        "reason": "High specificity (multiple dates/numbers; substantive text).",
+        "evidence_quotes": []
+      },
+      "C6": {
+        "score": 0,
+        "reason": "No corroboration detected within provided set.",
+        "evidence_quotes": []
+      },
+      "C7": {
+        "score": 1,
+        "reason": "Legal-process language detected; confirmation may be partial.",
+        "evidence_quotes": []
+      },
+      "C8": {
+        "score": 1,
+        "reason": "Track record unknown/mixed.",
+        "evidence_quotes": []
+      },
+      "C9": {
+        "score": 1,
+        "reason": "Neutral/unknown nuance level.",
+        "evidence_quotes": []
+      },
+      "C10": {
+        "score": 1,
+        "reason": "Generalist coverage / unclear domain depth.",
+        "evidence_quotes": []
+      }
+    },
+    "total_0_20": 9,
+    "hsus_0_100": 45,
+    "recommendation": "Context-only (not for key factual claims)",
+    "works_cited_entry": "Unknown author. \"Xi awarded 3rd term as China's president, extending rule.\" AP News, 2023-03-10. https://apnews.com/article/xi-jinping-china-president-vote-5e6230d8c881dc17b11a781e832accd1 (accessed 2026-01-24).",
+    "evidence_pages": [
+      "https://apnews.com/article/xi-jinping-china-president-vote-5e6230d8c881dc17b11a781e832accd1"
+    ],
+    "llm_used": false,
+    "llm_error": "Responses.create() got an unexpected keyword argument 'response_format'"
+  }
+]
