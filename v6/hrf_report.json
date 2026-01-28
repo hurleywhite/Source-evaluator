@@ -1,0 +1,395 @@
+[
+  {
+    "url": "https://news.mingpao.com/pns/%E4%B8%AD%E5%9C%8B/article/20200918/s00013/1600366615408/%E5%AE%98%E6%96%B9%E7%A8%B1%E6%96%B0%E5%86%A0%E5%B1%AC%E8%87%AA%E7%84%B6%E7%81%BD%E5%AE%B3-%E6%AD%A6%E6%BC%A2%E9%81%BA%E5%B1%AC%E8%88%88%E8%A8%9F%E8%A2%AB%E6%8B%92",
+    "final_url": "https://news.mingpao.com/pns/%E4%B8%AD%E5%9C%8B/section/20260128/s00013",
+    "domain": "mingpao.com",
+    "use_permission": "B: Usable with safeguards",
+    "permission_reason": "Evidence too weak for factual support - use as context only [LLM upgraded: The text excerpt contains reports from the Hong Kong newspaper Ming Pao, which is a reputable third-party source. While the reports cover a range of topics related to China and its relations, they include specific details and attributions that could be verified, making them usable with appropriate safeguards.]",
+    "core_checks": {
+      "intended_use": "B",
+      "relationship": {
+        "type": "third_party",
+        "a_only_restriction": false,
+        "reason": "Third-party source - potentially eligible for B use"
+      },
+      "completeness": {
+        "status": "complete",
+        "reason": "Full content retrieved (507 chars)"
+      },
+      "evidence_strength": {
+        "level": "weak",
+        "reason": "Assertions without clear evidence trail",
+        "quotes": []
+      },
+      "specificity": {
+        "has_anchors": false,
+        "reason": "No clear who/what/when/where/how much anchors found",
+        "anchors": []
+      },
+      "corroboration": {
+        "status": "not_assessed",
+        "reason": "Cross-source corroboration check not implemented in this run"
+      },
+      "severity_support": {
+        "claim_detected": false,
+        "status": "not_applicable",
+        "reason": "No systematic/widespread claims detected",
+        "missing": []
+      }
+    },
+    "publisher_signals": {
+      "ownership_transparency": {
+        "status": "not_assessed",
+        "assessed": false,
+        "reason": "Not found in retrieved pages",
+        "quotes": []
+      },
+      "corrections_behavior": {
+        "status": "not_assessed",
+        "assessed": false,
+        "reason": "Not found in retrieved pages",
+        "quotes": []
+      },
+      "standards_transparency": {
+        "status": "not_assessed",
+        "assessed": false,
+        "reason": "Not found in retrieved pages",
+        "quotes": []
+      }
+    },
+    "metadata": {
+      "fetch_status": "ok",
+      "content_type": "text/html; charset=UTF-8",
+      "text_length": 507,
+      "evidence_pages": [
+        "https://news.mingpao.com/pns/%E4%B8%AD%E5%9C%8B/section/20260128/s00013"
+      ],
+      "warnings": [],
+      "llm_used": true,
+      "llm_error": "",
+      "llm_decisions": [
+        "final_review_upgrade"
+      ]
+    }
+  },
+  {
+    "url": "https://pen.org/global-call-against-chinas-renewed-crackdown-on-human-rights-lawyers/",
+    "final_url": "https://pen.org/global-call-against-chinas-renewed-crackdown-on-human-rights-lawyers/",
+    "domain": "pen.org",
+    "use_permission": "B: Preferred evidence",
+    "permission_reason": "Strong primary anchors, complete access, traceable",
+    "core_checks": {
+      "intended_use": "B",
+      "relationship": {
+        "type": "third_party",
+        "a_only_restriction": false,
+        "reason": "Third-party source - potentially eligible for B use"
+      },
+      "completeness": {
+        "status": "complete",
+        "reason": "Full content retrieved (15316 chars) despite access warnings"
+      },
+      "evidence_strength": {
+        "level": "strong",
+        "reason": "Contains primary anchors: law, regulation, constitution",
+        "quotes": [
+          "Today, we mark China Human Rights Lawyers Day, in remembrance of the Chinese government’s roundup of over 300 human rights lawyers and le",
+          "d defenders; Immediately and unconditionally release all those arbitrarily detained; Amend laws and regulations, including national security legislation, its Criminal Law and Criminal Procedure Law, to bring th"
+        ]
+      },
+      "specificity": {
+        "has_anchors": true,
+        "reason": "Contains traceable anchors: dates/times (8 found); locations (7 found); named actors (19 found)",
+        "anchors": [
+          "dates/times (8 found)",
+          "locations (7 found)",
+          "named actors (19 found)"
+        ]
+      },
+      "corroboration": {
+        "status": "not_assessed",
+        "reason": "Cross-source corroboration check not implemented in this run"
+      },
+      "severity_support": {
+        "claim_detected": true,
+        "status": "supported",
+        "reason": "Supports systematic claim: extent + systematicity + institutionalization present",
+        "missing": []
+      }
+    },
+    "publisher_signals": {
+      "ownership_transparency": {
+        "status": "not_assessed",
+        "assessed": false,
+        "reason": "Not found in retrieved pages",
+        "quotes": []
+      },
+      "corrections_behavior": {
+        "status": "not_assessed",
+        "assessed": false,
+        "reason": "Not found in retrieved pages",
+        "quotes": []
+      },
+      "standards_transparency": {
+        "status": "not_assessed",
+        "assessed": false,
+        "reason": "Not found in retrieved pages",
+        "quotes": []
+      }
+    },
+    "metadata": {
+      "fetch_status": "ok",
+      "content_type": "text/html; charset=UTF-8",
+      "text_length": 15316,
+      "evidence_pages": [
+        "https://pen.org/global-call-against-chinas-renewed-crackdown-on-human-rights-lawyers/",
+        "https://pen.org/about-as-fast-as-this-car-will-go/",
+        "https://pen.org/about-us/",
+        "https://pen.org/contact-us/"
+      ],
+      "warnings": [
+        "Bot-block/anti-automation detected"
+      ],
+      "llm_used": false,
+      "llm_error": "",
+      "llm_decisions": []
+    }
+  },
+  {
+    "url": "https://tibet.net/about-cta/",
+    "final_url": "https://tibet.net/about-cta/",
+    "domain": "tibet.net",
+    "use_permission": "Manual retrieval needed",
+    "permission_reason": "Fetch failed - manual retrieval needed before assessment",
+    "core_checks": {
+      "intended_use": "B",
+      "relationship": {
+        "type": "self_interest",
+        "a_only_restriction": true,
+        "reason": "Source is the organization's own about/self-description page"
+      },
+      "completeness": {
+        "status": "failed",
+        "reason": "Fetch failed: http_error"
+      },
+      "evidence_strength": {
+        "level": "not_assessed",
+        "reason": "Insufficient text to assess",
+        "quotes": []
+      },
+      "specificity": {
+        "has_anchors": false,
+        "reason": "Insufficient text to assess",
+        "anchors": []
+      },
+      "corroboration": {
+        "status": "not_assessed",
+        "reason": "Cross-source corroboration check not implemented in this run"
+      },
+      "severity_support": {
+        "claim_detected": false,
+        "status": "not_assessed",
+        "reason": "No text to assess",
+        "missing": []
+      }
+    },
+    "publisher_signals": {
+      "ownership_transparency": {
+        "status": "not_assessed",
+        "assessed": false,
+        "reason": "Not found in retrieved pages",
+        "quotes": []
+      },
+      "corrections_behavior": {
+        "status": "not_assessed",
+        "assessed": false,
+        "reason": "Not found in retrieved pages",
+        "quotes": []
+      },
+      "standards_transparency": {
+        "status": "not_assessed",
+        "assessed": false,
+        "reason": "Not found in retrieved pages",
+        "quotes": []
+      }
+    },
+    "metadata": {
+      "fetch_status": "http_error",
+      "content_type": "text/html; charset=UTF-8",
+      "text_length": 0,
+      "evidence_pages": [
+        "https://tibet.net/about-cta/"
+      ],
+      "warnings": [
+        "HTTP 403"
+      ],
+      "llm_used": false,
+      "llm_error": "",
+      "llm_decisions": []
+    }
+  },
+  {
+    "url": "https://east-turkistan.net/about-the-etge/",
+    "final_url": "https://east-turkistan.net/about-the-etge/",
+    "domain": "east-turkistan.net",
+    "use_permission": "A: Narrative-only",
+    "permission_reason": "Self-interest/official source: Source is the organization's own about/self-description page",
+    "core_checks": {
+      "intended_use": "B",
+      "relationship": {
+        "type": "self_interest",
+        "a_only_restriction": true,
+        "reason": "Source is the organization's own about/self-description page"
+      },
+      "completeness": {
+        "status": "complete",
+        "reason": "Full content retrieved (2692 chars)"
+      },
+      "evidence_strength": {
+        "level": "medium",
+        "reason": "Assertions without clear evidence trail [LLM: Some verifiable claims, but limited primary evidence and attribution]",
+        "quotes": []
+      },
+      "specificity": {
+        "has_anchors": true,
+        "reason": "Contains traceable anchors: dates/times (4 found); locations (6 found); named actors (12 found)",
+        "anchors": [
+          "dates/times (4 found)",
+          "locations (6 found)",
+          "named actors (12 found)"
+        ]
+      },
+      "corroboration": {
+        "status": "not_assessed",
+        "reason": "Cross-source corroboration check not implemented in this run"
+      },
+      "severity_support": {
+        "claim_detected": false,
+        "status": "not_applicable",
+        "reason": "No systematic/widespread claims detected",
+        "missing": []
+      }
+    },
+    "publisher_signals": {
+      "ownership_transparency": {
+        "status": "found",
+        "assessed": true,
+        "reason": "Ownership/governance information found on publisher pages",
+        "quotes": [
+          "nal Congress (ETNC). The ETGE operates as a democratic entity with a representative Parliament. Its governance structure includes key positions such as the President, Vice President, Prime Minister, Speaker (Ch"
+        ]
+      },
+      "corrections_behavior": {
+        "status": "not_assessed",
+        "assessed": false,
+        "reason": "Not found in retrieved pages",
+        "quotes": []
+      },
+      "standards_transparency": {
+        "status": "not_assessed",
+        "assessed": false,
+        "reason": "Not found in retrieved pages",
+        "quotes": []
+      }
+    },
+    "metadata": {
+      "fetch_status": "ok",
+      "content_type": "text/html; charset=UTF-8",
+      "text_length": 2692,
+      "evidence_pages": [
+        "https://east-turkistan.net/about-the-etge/",
+        "https://east-turkistan.net/about-the-etge/",
+        "https://east-turkistan.net/contact/"
+      ],
+      "warnings": [],
+      "llm_used": true,
+      "llm_error": "",
+      "llm_decisions": [
+        "evidence_strength"
+      ]
+    }
+  },
+  {
+    "url": "https://www.aljazeera.com/news/2022/9/23/death-penalty-commuted-to-life-for-chinas-vice-security-minister",
+    "final_url": "https://www.aljazeera.com/news/2022/9/23/death-penalty-commuted-to-life-for-chinas-vice-security-minister",
+    "domain": "aljazeera.com",
+    "use_permission": "B: Preferred evidence",
+    "permission_reason": "Strong primary anchors, complete access, traceable",
+    "core_checks": {
+      "intended_use": "B",
+      "relationship": {
+        "type": "third_party",
+        "a_only_restriction": false,
+        "reason": "Third-party source - potentially eligible for B use"
+      },
+      "completeness": {
+        "status": "complete",
+        "reason": "Full content retrieved (2895 chars)"
+      },
+      "evidence_strength": {
+        "level": "strong",
+        "reason": "Contains primary anchors: law, court, ruling",
+        "quotes": [
+          "d been expelled from the Communist Party in 2021 for “grave violations” of party discipline and the law. A court in Jilin province, in China’s northeast, handed Sun the death sentence on Friday with a tw",
+          "expelled from the Communist Party in 2021 for “grave violations” of party discipline and the law. A court in Jilin province, in China’s northeast, handed Sun the death sentence on Friday with a two-year re"
+        ]
+      },
+      "specificity": {
+        "has_anchors": true,
+        "reason": "Contains traceable anchors: dates/times (6 found); quantities (4 found); named actors (12 found)",
+        "anchors": [
+          "dates/times (6 found)",
+          "quantities (4 found)",
+          "named actors (12 found)"
+        ]
+      },
+      "corroboration": {
+        "status": "not_assessed",
+        "reason": "Cross-source corroboration check not implemented in this run"
+      },
+      "severity_support": {
+        "claim_detected": false,
+        "status": "not_applicable",
+        "reason": "No systematic/widespread claims detected",
+        "missing": []
+      }
+    },
+    "publisher_signals": {
+      "ownership_transparency": {
+        "status": "not_assessed",
+        "assessed": false,
+        "reason": "Not found in retrieved pages",
+        "quotes": []
+      },
+      "corrections_behavior": {
+        "status": "not_assessed",
+        "assessed": false,
+        "reason": "Not found in retrieved pages",
+        "quotes": []
+      },
+      "standards_transparency": {
+        "status": "found",
+        "assessed": true,
+        "reason": "Editorial standards or methodology information found",
+        "quotes": [
+          "nds play-arrow 24:22 Being a globally oriented media service, Al Jazeera shall adopt the following code of ethics in pursuance of the vision and mission it has set for itself: 1. Adhere to the journalistic values"
+        ]
+      }
+    },
+    "metadata": {
+      "fetch_status": "ok",
+      "content_type": "text/html; charset=utf-8",
+      "text_length": 2895,
+      "evidence_pages": [
+        "https://www.aljazeera.com/news/2022/9/23/death-penalty-commuted-to-life-for-chinas-vice-security-minister",
+        "https://www.aljazeera.com/about-us",
+        "https://www.aljazeera.com/editorial",
+        "https://www.aljazeera.com/code-of-ethics"
+      ],
+      "warnings": [],
+      "llm_used": false,
+      "llm_error": "",
+      "llm_decisions": []
+    }
+  }
+]

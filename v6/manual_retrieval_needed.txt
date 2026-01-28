@@ -1,0 +1,40 @@
+# Sources Requiring Manual Retrieval
+# Generated: 2026-01-28
+# These 23 sources could not be automatically evaluated due to paywalls, bot-blocking, or fetch failures.
+
+# Paywalled sites
+https://www.wsj.com/articles/chinas-national-security-law-reaches-into-harvard-princeton-classrooms-11597829402
+https://www.washingtonpost.com/world/2022/03/31/australian-trial-china/
+https://www.economist.com/china/2023/03/09/what-party-control-means-in-china
+https://www.nytimes.com/2020/10/24/technology/epoch-times-influence-falun-gong.html
+https://www.nytimes.com/2023/04/23/world/europe/chinese-censorship-covid.html
+
+# Bot-blocked / HTTP errors
+https://tibet.net/about-cta/
+https://tibet.net/cta-successfully-lobbies-us-senate-for-the-passage-of-the-landmark-tibetan-policy-and-support-act-2020/
+https://www.reuters.com/article/idUSTRE61A0B720100211
+https://www.refworld.org/docid/546492804.html
+https://www.icnl.org/resources/civic-freedom-monitor/china
+https://www.business-humanrights.org/en/latest-news/china-human-rights-lawyers-concern-group-report-on-the-709-crackdown/
+https://www.ohchr.org/en/press-releases/2021/11/china-journalist-jailed-covid-reporting-seriously-ill-must-be-released-un
+https://www.ohchr.org/en/press-releases/2016/05/china-newly-adopted-foreign-ngo-law-should-be-repealed-un-experts-urge
+https://2001-2009.state.gov/r/pa/prs/ps/2004/38594.htm
+http://www.npc.gov.cn/englishnpc/constitution2019/201911/1f65146fb6104dd3a2793875d19b5b29.shtml
+https://www.justice.gov/opa/pr/40-officers-china-s-national-police-charged-transnational-repression-schemes-targeting-us
+https://papers.ssrn.com/sol3/papers.cfm?abstract_id=3761675
+https://www.businessinsider.com/china-communist-party-mouthpiece-demands-rectification-of-satirical-twitter-account-2014-4
+https://www.congress.gov/crs-product/IF11180
+https://journals.sagepub.com/doi/10.1177/17427665251328117
+
+# PDF extraction failures
+https://www.state.gov/wp-content/uploads/2022/03/3136152_CHINA-2021-HUMAN-RIGHTS-REPORT.pdf
+https://www.ilo.org/dyn/natlex/docs/ELECTRONIC/5375/108071/F-78796243/CHN5375%20Eng3.pdf
+https://isdp.eu/content/uploads/2021/04/Xi-Jinpings-Anti-corruption-Struggle-IB-09.04.21.pdf
+
+# Social media / video (cannot auto-evaluate)
+https://x.com/TheOnion/status/1999268031860490265
+https://www.facebook.com/TheOnion/videos/china-agrees-to-purchase-11-us-soybeans/1526771408345649/
+https://www.facebook.com/TheOnion/videos/us-blows-itself-up-so-china-cant-have-it/2311039672628312/
+https://www.youtube.com/watch?v=l2UWJeQIHpw
+https://www.youtube.com/watch?v=XupM5_zHDbM
+https://www.youtube.com/watch?v=3U8OcBWI47w
