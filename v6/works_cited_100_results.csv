@@ -7,7 +7,7 @@ https://www.aljazeera.com/news/2022/9/23/death-penalty-commuted-to-life-for-chin
 https://apnews.com/article/xi-jinping-china-president-vote-5e6230d8c881dc17b11a781e832accd1,B: Preferred evidence,"Strong primary anchors, complete access, traceable"
 https://chinamediaproject.org/2013/08/27/china-defines-seven-base-lines-for-a-nicer-internet/,B: Preferred evidence,"Strong primary anchors, complete access, traceable"
 https://www.bbc.com/news/world-asia-china-54969682,B: Preferred evidence,"Strong primary anchors, complete access, traceable"
-https://www.wired.com/story/uyghur-internet-erased-china/,B: Usable with safeguards,Secondary reporting - must corroborate for key claims
+https://www.wired.com/story/uyghur-internet-erased-china/,B: Usable with safeguards,"Evidence too weak for factual support - use as context only [LLM upgraded: The source provides specific details about the impact of government repression on the technology sector in Xinjiang, including the arrest of individuals and the blocking of websites. While some of the claims are not directly verified, the overall context and details provided lend credibility to the analysis.]"
 https://www.theguardian.com/world/2012/oct/26/new-york-times-china-wen-jiabao,B: Preferred evidence,"Strong primary anchors, complete access, traceable"
 https://www.reuters.com/article/idUSTRE61A0B720100211,Manual retrieval needed,Fetch failed - manual retrieval needed before assessment
 https://www.refworld.org/docid/546492804.html,Manual retrieval needed,Fetch failed - manual retrieval needed before assessment
@@ -22,13 +22,13 @@ https://www.ohchr.org/en/press-releases/2021/11/china-journalist-jailed-covid-re
 https://freedomhouse.org/report/china-media-bulletin/china-media-bulletin-issue-no-97,B: Preferred evidence,"Strong primary anchors, complete access, traceable"
 https://www.hrw.org/news/2016/04/28/china-new-law-escalates-repression-groups,B: Preferred evidence,"Strong primary anchors, complete access, traceable"
 https://www.ohchr.org/en/press-releases/2016/05/china-newly-adopted-foreign-ngo-law-should-be-repealed-un-experts-urge,Manual retrieval needed,Fetch failed - manual retrieval needed before assessment
-https://2001-2009.state.gov/r/pa/prs/ps/2004/38594.htm,Do not use,LLM detected satire: Playful take on common website error message
+https://2001-2009.state.gov/r/pa/prs/ps/2004/38594.htm,Manual retrieval needed,Partial content retrieved - manual retrieval needed for B use
 https://www.amnesty.org/en/latest/news/2021/11/china-release-jailed-wuhan-activist-close-to-death-after-hunger-strike/,B: Preferred evidence,"Strong primary anchors, complete access, traceable"
 https://isdp.eu/publication/chinas-presidential-election-role-npc/,B: Preferred evidence,"Strong primary anchors, complete access, traceable"
 https://freedomhouse.org/report/transnational-repression/china,B: Preferred evidence,"Strong primary anchors, complete access, traceable"
 https://www.hrw.org/reports/1997/china5/,B: Preferred evidence,"Strong primary anchors, complete access, traceable"
 https://www.hrw.org/news/2022/09/14/china-xinjiang-official-figures-reveal-higher-prisoner-count,B: Preferred evidence,"Strong primary anchors, complete access, traceable"
-http://www.npc.gov.cn/englishnpc/constitution2019/201911/1f65146fb6104dd3a2793875d19b5b29.shtml,Do not use,LLM detected satire: Absurd and exaggerated language used to mock Chinese politics.
+http://www.npc.gov.cn/englishnpc/constitution2019/201911/1f65146fb6104dd3a2793875d19b5b29.shtml,Do not use,LLM detected satire: Content appears to be satirizing Chinese government and leadership
 https://thediplomat.com/2021/11/chinas-content-manipulation-reaches-new-frontiers/,B: Preferred evidence,"Strong primary anchors, complete access, traceable"
 https://www.state.gov/wp-content/uploads/2022/03/3136152_CHINA-2021-HUMAN-RIGHTS-REPORT.pdf,Manual retrieval needed,Fetch failed - manual retrieval needed before assessment
 https://www.wsj.com/articles/chinas-national-security-law-reaches-into-harvard-princeton-classrooms-11597829402,Manual retrieval needed,Fetch failed - manual retrieval needed before assessment
@@ -40,35 +40,35 @@ https://www.duihuahrjournal.org/2021/07/china-all-state-security-judgments.html?
 https://east-turkistan.net/east-turkistan-government-in-exile-empowers-democracy-with-landmark-parliamentary-candidate-elections-in-europe/,A: Narrative-only,Self-interest/official source: Official government/state source - treat claims as narrative unless corroborated
 https://www.economist.com/china/2023/03/09/what-party-control-means-in-china,Manual retrieval needed,Fetch failed - manual retrieval needed before assessment
 https://www.theguardian.com/news/2018/jun/29/the-great-firewall-of-china-xi-jinpings-internet-shutdown,B: Preferred evidence,"Strong primary anchors, complete access, traceable"
-https://www.cbc.ca/news/editorsblog/brodie-fenlon-blog-china-1.6636644,A: Narrative-only,Self-interest/official source: LLM detected self-interest: The source is describing and promoting its own news organization and its journalism.
+https://www.cbc.ca/news/editorsblog/brodie-fenlon-blog-china-1.6636644,A: Narrative-only,Self-interest/official source: LLM detected self-interest: The source describes the CBC's journalism and bureaus
 https://supremepeoplescourtmonitor.com/tag/judicial-responsibility/,B: Preferred evidence,"Strong primary anchors, complete access, traceable"
 https://www.chinafile.com/ngo/latest/five-more-foreign-ngos-de-register-representative-offices,B: Usable with safeguards,Secondary reporting - must corroborate for key claims
 https://www.justice.gov/opa/pr/40-officers-china-s-national-police-charged-transnational-repression-schemes-targeting-us,Manual retrieval needed,Fetch failed - manual retrieval needed before assessment
 https://cpj.org/reports/2022/12/number-of-jailed-journalists-spikes-to-new-global-record/,B: Preferred evidence,"Strong primary anchors, complete access, traceable"
-https://blog.google/threat-analysis-group/tag-bulletin-q4-2022/,A: Narrative-only,Self-interest/official source: LLM detected self-interest: The article describes Google's own efforts to terminate coordinated influence operations
-https://freedomhouse.org/article/more-governments-finding-new-ways-silence-exiled-voices,A: Narrative-only,Self-interest/official source: Official government/state source - treat claims as narrative unless corroborated
-http://tibetoffice.org/media-press/commentaries-opinions/the-legitimacy-and-role-of-the-central-tibetan-administration,A: Narrative-only,Self-interest/official source: LLM detected self-interest: The source is promoting and describing the Central Tibetan Administration.
+https://blog.google/threat-analysis-group/tag-bulletin-q4-2022/,B: Usable with safeguards,"Evidence too weak for factual support - use as context only [LLM upgraded: The text contains detailed information about coordinated influence operations terminated by the Threat Analysis Group, including specific details about the number of channels and websites involved, the countries and languages targeted, and the content of the campaigns. While the source is not a primary one, the level of detail and specificity provided makes this a usable source with appropriate safeguards.]"
+https://freedomhouse.org/article/more-governments-finding-new-ways-silence-exiled-voices,B: Preferred evidence,"Strong primary anchors, complete access, traceable"
+http://tibetoffice.org/media-press/commentaries-opinions/the-legitimacy-and-role-of-the-central-tibetan-administration,A: Narrative-only,Self-interest/official source: LLM detected self-interest: The source is an official of the Central Tibetan Administration
 https://papers.ssrn.com/sol3/papers.cfm?abstract_id=3761675,Manual retrieval needed,Partial content retrieved - manual retrieval needed for B use
 https://www.theonion.com/sexiest-man-alive-kim-jong-un-1819574357,Do not use,Known satire site: theonion.com
-https://www.bbc.com/news/world-asia-20518929,Do not use,LLM detected satire: Chinese newspaper falls for Onion's spoof article on Kim Jong-un
-https://www.npr.org/2012/12/01/166293306/the-onion-so-funny-it-makes-us-cry,Do not use,LLM detected satire: The Onion article satirizes North Korea's cult of personality
-https://www.latimes.com/archives/la-xpm-2002-jun-07-fg-whoops7-story.html,Do not use,LLM detected satire: Newspaper published a false story from satirical publication The Onion
+https://www.bbc.com/news/world-asia-20518929,B: Usable with safeguards,Secondary reporting - must corroborate for key claims
+https://www.npr.org/2012/12/01/166293306/the-onion-so-funny-it-makes-us-cry,B: Usable with safeguards,Secondary reporting - must corroborate for key claims
+https://www.latimes.com/archives/la-xpm-2002-jun-07-fg-whoops7-story.html,B: Usable with safeguards,Secondary reporting - must corroborate for key claims
 https://www.businessinsider.com/china-communist-party-mouthpiece-demands-rectification-of-satirical-twitter-account-2014-4,Manual retrieval needed,Fetch failed - manual retrieval needed before assessment
 https://www.chinadaily.com.cn/a/202108/06/WS610c9a2ba310efa1bd6671b2.html,B: Usable with safeguards,Secondary reporting - must corroborate for key claims
-https://mediabiasfactcheck.com/china-daily/,C: Context-only,Evidence too weak for factual support - use as context only
+https://mediabiasfactcheck.com/china-daily/,A: Narrative-only,Self-interest/official source: LLM detected self-interest: China Daily is owned and funded by the Chinese government
 https://hcpl.net/blogs/post/why-is-china-daily-in-my-local-newspaper/,C: Context-only,Evidence too weak for factual support - use as context only
-https://www.bbc.com/news/world-asia-china-57780023,B: Preferred evidence,"Strong primary anchors, complete access, traceable"
-https://www.reddit.com/r/China/comments/mittq2/the_case_of_cgtns_fake_french_journalist_keeps/,Do not use,LLM detected satire: Mocking China's attempts to create a false media presence
-https://en.wikipedia.org/wiki/Global_Times,A: Narrative-only,Self-interest/official source: LLM detected self-interest: The article extensively describes the Global Times newspaper and its operations.
+https://www.bbc.com/news/world-asia-china-57780023,A: Narrative-only,Self-interest/official source: LLM detected self-interest: The source describes vloggers cooperating with Chinese state media
+https://www.reddit.com/r/China/comments/mittq2/the_case_of_cgtns_fake_french_journalist_keeps/,A: Narrative-only,Self-interest/official source: LLM detected self-interest: Claims made about CGTN and its 'fake' journalist Laurene
+https://en.wikipedia.org/wiki/Global_Times,C: Context-only,"Wikipedia is a tertiary source - use for context only, cite primary sources for factual claims"
 https://bfi.uchicago.edu/wp-content/uploads/Media_Bias-2016Nov21.pdf,B: Preferred evidence,"Strong primary anchors, complete access, traceable"
 https://freedomhouse.org/report/special-report/2020/beijings-global-megaphone,B: Preferred evidence,"Strong primary anchors, complete access, traceable"
 https://www.nytimes.com/2020/10/24/technology/epoch-times-influence-falun-gong.html,Manual retrieval needed,Fetch failed - manual retrieval needed before assessment
-https://en.wikipedia.org/wiki/Forced_organ_harvesting_from_Falun_Gong_practitioners_in_China,B: Preferred evidence,"Strong primary anchors, complete access, traceable"
+https://en.wikipedia.org/wiki/Forced_organ_harvesting_from_Falun_Gong_practitioners_in_China,C: Context-only,"Wikipedia is a tertiary source - use for context only, cite primary sources for factual claims"
 https://www.nytimes.com/2023/04/23/world/europe/chinese-censorship-covid.html,Manual retrieval needed,Fetch failed - manual retrieval needed before assessment
 https://www.wired.com/story/china-social-credit-score-system/,B: Preferred evidence,"Strong primary anchors, complete access, traceable"
 https://publish.illinois.edu/imedia/files/2022/11/The-Complicated-Truth-About-Chinas-Social-Credit-System.pdf,B: Preferred evidence,"Strong primary anchors, complete access, traceable"
 https://www.globalpolicyjournal.com/articles/world-economy-trade-and-finance/discordant-debt-trap-and-secrecy-narratives-belt-and-road,C: Context-only,Evidence too weak for factual support - use as context only
-http://www.cnfocus.com/debunking-the-chinese-debttrap-narrative-in-3-steps/,B: Usable with safeguards,"Evidence too weak for factual support - use as context only [LLM upgraded: The text provides a systematic analysis of the 'debt-trap' narrative around China's Belt and Road Initiative, with specific data on debt compositions in countries like Sri Lanka and Kenya. While the analysis has a clear pro-China bias, the methodology and data sources cited give it sufficient credibility to be considered 'usable with safeguards'.]"
+http://www.cnfocus.com/debunking-the-chinese-debttrap-narrative-in-3-steps/,C: Context-only,Evidence too weak for factual support - use as context only
 https://asiatimes.com/2023/09/debunking-the-confucius-institute-spy-myth/,B: Preferred evidence,"Strong primary anchors, complete access, traceable"
 https://www.congress.gov/crs-product/IF11180,Manual retrieval needed,Fetch failed - manual retrieval needed before assessment
 https://www.codastory.com/disinformation/memes-satire-hongkong-frontlines/,Do not use,Satire/parody signals detected in page metadata
@@ -79,23 +79,23 @@ https://www.cnbc.com/2017/03/15/china-currency-manipulator-claims-are-false-sp-g
 https://www.belfercenter.org/publication/non-problem-chinese-currency-manipulation-0,B: Preferred evidence,"Strong primary anchors, complete access, traceable"
 https://www.matthewsasia.com/insights/sinology/2023/the-coming-collapse-of-china/,B: Preferred evidence,"Strong primary anchors, complete access, traceable"
 https://warontherocks.com/2015/02/a-shaky-case-for-chinese-deception-a-review-of-the-hundred-year-marathon/,B: Preferred evidence,"Strong primary anchors, complete access, traceable"
-https://www.cnn.com/2012/11/27/world/asia/north-korea-china-onion,Do not use,LLM detected satire: The Onion is a well-known satirical news website.
+https://www.cnn.com/2012/11/27/world/asia/north-korea-china-onion,B: Usable with safeguards,"Lacks traceable anchors (who/what/when/where) - use as context only [LLM upgraded: The source has attribution, with quotes from the Onion editor and the Chinese news website, as well as specific details about the Onion article and the Chinese news coverage. This provides sufficient verifiable claims to consider it usable with appropriate safeguards.]"
 https://x.com/TheOnion/status/1999268031860490265,Manual retrieval needed,Fetch failed - manual retrieval needed before assessment
-https://www.facebook.com/TheOnion/videos/china-agrees-to-purchase-11-us-soybeans/1526771408345649/,Do not use,LLM detected satire: The Onion is a satirical news publication known for absurd headlines.
-https://www.facebook.com/TheOnion/videos/us-blows-itself-up-so-china-cant-have-it/2311039672628312/,Do not use,LLM detected satire: Onion is a satirical news website known for parody
-https://onion20.substack.com/p/june-2005-the-onion-listed-everything-that-can-go-wrong,Do not use,LLM detected satire: The Onion is a well-known satirical news publication
+https://www.facebook.com/TheOnion/videos/china-agrees-to-purchase-11-us-soybeans/1526771408345649/,Do not use,LLM detected satire: The Onion is a well-known satirical news website
+https://www.facebook.com/TheOnion/videos/us-blows-itself-up-so-china-cant-have-it/2311039672628312/,Do not use,LLM detected satire: The Onion is a well-known satirical news website
+https://onion20.substack.com/p/june-2005-the-onion-listed-everything-that-can-go-wrong,B: Preferred evidence,"Strong primary anchors, complete access, traceable"
 https://journals.sagepub.com/doi/10.1177/17427665251328117,Manual retrieval needed,Fetch failed - manual retrieval needed before assessment
 https://www.globaltimes.cn/content/961959.shtml,A: Narrative-only,Self-interest/official source: State-affiliated media - treat claims as narrative
-https://en.wikipedia.org/wiki/China_Global_Television_Network,A: Narrative-only,Self-interest/official source: LLM detected self-interest: The source discusses CGTN's role as a state-owned Chinese media outlet
-https://en.wikipedia.org/wiki/The_Coming_Collapse_of_China,B: Preferred evidence,"Strong primary anchors, complete access, traceable"
-https://www.youtube.com/watch?v=l2UWJeQIHpw,Do not use,LLM detected satire: YouTube title criticizing China collapse prediction as wrong
+https://en.wikipedia.org/wiki/China_Global_Television_Network,C: Context-only,"Wikipedia is a tertiary source - use for context only, cite primary sources for factual claims"
+https://en.wikipedia.org/wiki/The_Coming_Collapse_of_China,C: Context-only,"Wikipedia is a tertiary source - use for context only, cite primary sources for factual claims"
+https://www.youtube.com/watch?v=l2UWJeQIHpw,Manual retrieval needed,Partial content retrieved - manual retrieval needed for B use
 https://www.youtube.com/watch?v=XupM5_zHDbM,Manual retrieval needed,Partial content retrieved - manual retrieval needed for B use
 https://harvardlawreview.org/print/vol-136/when-powers-clash-an-amoral-appraisal-of-rmb-usd-interactions/,B: Preferred evidence,"Strong primary anchors, complete access, traceable"
-https://blog.richardvanhooijdonk.com/en/the-truth-about-chinas-futuristic-ghost-cities/,B: Usable with safeguards,Secondary reporting - must corroborate for key claims
-https://en.wikipedia.org/wiki/Underoccupied_developments_in_China,B: Usable with safeguards,Secondary reporting - must corroborate for key claims
+https://blog.richardvanhooijdonk.com/en/the-truth-about-chinas-futuristic-ghost-cities/,B: Usable with safeguards,"Evidence too weak for factual support - use as context only [LLM upgraded: The text excerpt provides context and analysis from a third-party source, with some verifiable claims (e.g. population figures for Kangbashi District). While the source may not be authoritative, the information could be usable with appropriate safeguards.]"
+https://en.wikipedia.org/wiki/Underoccupied_developments_in_China,C: Context-only,"Wikipedia is a tertiary source - use for context only, cite primary sources for factual claims"
 https://u.osu.edu/mclc/2020/01/30/wuhan-virus-is-not-a-lab-made-bioweapon/,B: Usable with safeguards,Secondary reporting - must corroborate for key claims
 https://news.cgtn.com/news/2020-05-03/Steve-Bannon-A-modern-day-demagogue-QcaRcgTWGA/index.html,A: Narrative-only,Self-interest/official source: State-affiliated media - treat claims as narrative
-https://www.youtube.com/watch?v=3U8OcBWI47w,Do not use,LLM detected satire: Presumed to be satirizing Tucker Carlson's sensational reporting
-https://www.motherjones.com/politics/2022/02/guo-wengui-miles-guo-gettr-steve-bannon/,Do not use,"LLM detected satire: Exaggerated, comedic portrayal of political figures and events"
-https://en.wikipedia.org/wiki/COVID-19_lab_leak_theory,B: Preferred evidence,"Strong primary anchors, complete access, traceable"
+https://www.youtube.com/watch?v=3U8OcBWI47w,Manual retrieval needed,Partial content retrieved - manual retrieval needed for B use
+https://www.motherjones.com/politics/2022/02/guo-wengui-miles-guo-gettr-steve-bannon/,B: Preferred evidence,"Strong primary anchors, complete access, traceable"
+https://en.wikipedia.org/wiki/COVID-19_lab_leak_theory,C: Context-only,"Wikipedia is a tertiary source - use for context only, cite primary sources for factual claims"
 https://www.dni.gov/files/ODNI/documents/assessments/Declassified-Assessment-on-COVID-19-Origins.pdf,A: Narrative-only,Self-interest/official source: Official government/state source - treat claims as narrative unless corroborated

@@ -493,17 +493,22 @@ def llm_assess_self_interest(
 ) -> Optional[Tuple[bool, str]]:
     """LLM review for self-interest. Returns (is_self_interest, reason) or None."""
     truncated = text[:LLM_MAX_TEXT_CHARS] if len(text) > LLM_MAX_TEXT_CHARS else text
-    prompt = f"""Analyze if this source is speaking about itself (self-interest).
+    prompt = f"""Determine if this source has a self-interest conflict for evidentiary purposes.
 
 URL: {url}
 
 TEXT EXCERPT:
 {truncated}
 
-Is this source primarily:
-- Describing/promoting itself or its own organization?
-- Making claims about its own accomplishments?
-- An "about us" or self-description page?
+IMPORTANT DISTINCTIONS:
+- Self-interest means the source is making claims ABOUT ITSELF or its own organization
+- An NGO (Freedom House, Amnesty, HRW) reporting on a GOVERNMENT is NOT self-interest — they are third-party reporters
+- A tech company (Google, Microsoft) reporting on EXTERNAL threat actors is NOT self-interest
+- A government source making claims about its own policies IS self-interest
+- An "about us" page describing the organization IS self-interest
+- Research organizations publishing analysis of external actors are NOT self-interest
+
+Is this source primarily making claims about ITSELF (its own organization, its own accomplishments, its own mission)?
 
 Respond ONLY with JSON:
 {{"is_self_interest": true|false, "reason": "brief 10-word explanation"}}"""
@@ -518,18 +523,28 @@ def llm_assess_satire(
     client: Any,
     title: str,
     text: str,
+    domain: str = "",
     model: str = DEFAULT_LLM_MODEL
 ) -> Optional[Tuple[bool, str]]:
     """LLM review for satire/parody. Returns (is_satire, reason) or None."""
     truncated = text[:2000] if len(text) > 2000 else text
-    prompt = f"""Analyze if this content is satire, parody, or humor.
+    prompt = f"""Determine if this content IS ITSELF satire/parody (not just discussing satire).
 
+DOMAIN: {domain}
 TITLE: {title}
 
 TEXT EXCERPT:
 {truncated}
 
-Is this content satirical, parodic, or intentionally humorous (not serious news/analysis)?
+CRITICAL DISTINCTIONS:
+- A news article ABOUT The Onion or discussing satire is NOT satire - it's journalism
+- A BBC/NPR/CNN article covering a satirical story is NOT satire - it's news coverage
+- An investigative article from Mother Jones, Wired, or similar is NOT satire - it's journalism
+- Only mark as satire if the SOURCE ITSELF is producing satirical/parodic content
+- The Onion, Babylon Bee, Clickhole are satire sites
+- News organizations reporting ON satirical content are NOT satire
+
+Is this content ITSELF satirical/parodic (the source is producing humor, not reporting on it)?
 
 Respond ONLY with JSON:
 {{"is_satire": true|false, "reason": "brief 10-word explanation"}}"""
@@ -847,6 +862,20 @@ def assess_relationship(url: str, domain: str, text: str) -> Tuple[RelationshipT
     url_low = url.lower()
     domain_low = domain.lower()
 
+    # Known third-party research/advocacy organizations - these report on EXTERNAL actors
+    # They are NOT self-interest when reporting on governments, corporations, or other entities
+    known_third_party_reporters = [
+        "freedomhouse.org", "hrw.org", "amnesty.org", "refworld.org",
+        "cpj.org", "pen.org", "icnl.org", "ohchr.org",
+        "blog.google",  # Google TAG reports on external threat actors
+        "citizenlab.ca", "eff.org", "accessnow.org",
+    ]
+    if any(org in domain_low for org in known_third_party_reporters):
+        # Only mark as self-interest if it's actually an about page
+        if "/about" in url_low or "who-we-are" in url_low:
+            return RelationshipType.SELF_INTEREST, True, "Source is the organization's own about/self-description page"
+        return RelationshipType.THIRD_PARTY, False, "Third-party research/advocacy organization reporting on external actors"
+
     # Self-interest: about pages, org speaking about itself
     if "/about" in url_low or "who-we-are" in url_low:
         return RelationshipType.SELF_INTEREST, True, "Source is the organization's own about/self-description page"
@@ -860,9 +889,6 @@ def assess_relationship(url: str, domain: str, text: str) -> Tuple[RelationshipT
     state_media = ["xinhua", "globaltimes", "rt.com", "sputnik", "presstv", "cgtn"]
     if any(sm in domain_low for sm in state_media):
         return RelationshipType.OFFICIAL_STATE, True, "State-affiliated media - treat claims as narrative"
-
-    # If domain appears in the text as the subject, might be self-interest
-    # This is a heuristic - could be refined
 
     return RelationshipType.THIRD_PARTY, False, "Third-party source - potentially eligible for B use"
 
@@ -1122,11 +1148,18 @@ def determine_use_permission(
     core: CoreChecks,
     publisher: PublisherSignals,
     is_single_source: bool,
+    domain: str = "",
 ) -> Tuple[UsePermission, str]:
     """
     Determine final use permission based on all checks.
     """
     reasons = []
+
+    # Rule: Wikipedia is a tertiary source - not suitable for B use
+    if "wikipedia.org" in domain.lower():
+        if intended_use == IntendedUse.B:
+            return UsePermission.C_CONTEXT, "Wikipedia is a tertiary source - use for context only, cite primary sources for factual claims"
+        return UsePermission.C_CONTEXT, "Wikipedia - tertiary source for context/background"
 
     # Rule: Access failure caps B use
     if core.completeness == Completeness.FAILED:
@@ -1242,7 +1275,7 @@ def evaluate_source(
     # LLM augmentation: verify satire detection on borderline cases
     if not should_reject and llm_client and main.text:
         # Check if content might be satirical even without keyword matches
-        llm_satire = llm_assess_satire(llm_client, main.title or "", main.text, llm_model)
+        llm_satire = llm_assess_satire(llm_client, main.title or "", main.text, main.domain, llm_model)
         if llm_satire and llm_satire[0]:
             should_reject = True
             reject_reason = f"LLM detected satire: {llm_satire[1]}"
@@ -1356,10 +1389,11 @@ def evaluate_source(
                 result.llm_decisions.append("severity_support")
 
     # Determine final use permission
-    use_perm, perm_reason = determine_use_permission(intended_use, core, result.publisher, is_single_source)
+    use_perm, perm_reason = determine_use_permission(intended_use, core, result.publisher, is_single_source, main.domain)
 
     # LLM final review: check if C: Context-only could be upgraded
-    if llm_client and main.text and use_perm == UsePermission.C_CONTEXT:
+    # Skip upgrade review for Wikipedia (tertiary source - always context-only)
+    if llm_client and main.text and use_perm == UsePermission.C_CONTEXT and "wikipedia.org" not in main.domain.lower():
         checks_summary = f"evidence={core.evidence_strength.value}, specificity={core.has_specificity}, relationship={core.relationship.value}"
         llm_final = llm_final_review(
             llm_client, main.text, use_perm.value, checks_summary, llm_model
