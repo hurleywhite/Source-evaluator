@@ -528,7 +528,7 @@ def llm_assess_satire(
 ) -> Optional[Tuple[bool, str]]:
     """LLM review for satire/parody. Returns (is_satire, reason) or None."""
     truncated = text[:2000] if len(text) > 2000 else text
-    prompt = f"""Determine if this content IS ITSELF satire/parody (not just discussing satire).
+    prompt = f"""You are evaluating whether a source should be REJECTED as satire/parody.
 
 DOMAIN: {domain}
 TITLE: {title}
@@ -536,15 +536,27 @@ TITLE: {title}
 TEXT EXCERPT:
 {truncated}
 
-CRITICAL DISTINCTIONS:
-- A news article ABOUT The Onion or discussing satire is NOT satire - it's journalism
-- A BBC/NPR/CNN article covering a satirical story is NOT satire - it's news coverage
-- An investigative article from Mother Jones, Wired, or similar is NOT satire - it's journalism
-- Only mark as satire if the SOURCE ITSELF is producing satirical/parodic content
-- The Onion, Babylon Bee, Clickhole are satire sites
-- News organizations reporting ON satirical content are NOT satire
+QUESTION: Is the SOURCE ITSELF producing satirical/parodic/fake-news content?
 
-Is this content ITSELF satirical/parodic (the source is producing humor, not reporting on it)?
+ANSWER "is_satire": true ONLY IF:
+- The source is a satire publication (The Onion, Babylon Bee, Clickhole, etc.)
+- The content is intentionally fabricated humor presented as fake news
+- The source is creating parody content
+
+ANSWER "is_satire": false IF:
+- The article is JOURNALISM ABOUT satire (e.g., BBC reporting on an Onion article)
+- The article DISCUSSES memes, humor, or satire as a topic (e.g., "how protesters use memes")
+- The article ANALYZES satirical content or publications
+- The article MENTIONS satire/humor in passing but is itself serious journalism
+- The source is a news organization, think tank, NGO, or research institution
+- The content is academic analysis of satire/humor
+- Facebook/YouTube pages EMBEDDING satirical content from elsewhere
+
+KEY EXAMPLES:
+- BBC article titled "Onion names Kim Jong-un sexiest man" → is_satire: FALSE (journalism about satire)
+- Article titled "Memes and satire on Hong Kong frontlines" → is_satire: FALSE (journalism about memes)
+- The Onion article "Kim Jong-un Sexiest Man Alive" → is_satire: TRUE (source producing satire)
+- Substack analyzing what The Onion got right → is_satire: FALSE (analysis of satire)
 
 Respond ONLY with JSON:
 {{"is_satire": true|false, "reason": "brief 10-word explanation"}}"""
@@ -1211,21 +1223,28 @@ def determine_use_permission(
     return UsePermission.DO_NOT_USE, "Could not determine appropriate use"
 
 
-def check_auto_reject(doc: FetchedDoc) -> Tuple[bool, str]:
-    """Check if source should be auto-rejected (satire, spam, etc.)."""
+def check_auto_reject(doc: FetchedDoc) -> Tuple[bool, str, bool]:
+    """Check if source should be auto-rejected (satire, spam, etc.).
+
+    Returns: (should_reject, reason, needs_llm_satire_review)
+    - should_reject: True only for KNOWN satire domains
+    - needs_llm_satire_review: True if satire signals detected but needs LLM verification
+    """
     domain = doc.domain.lower()
 
-    # Known satire
+    # Known satire domains - definite reject, no LLM needed
     if domain in KNOWN_SATIRE_DOMAINS:
-        return True, f"Known satire site: {domain}"
+        return True, f"Known satire site: {domain}", False
 
-    # Satire signals in page
+    # Satire signals in metadata - FLAG for LLM review, don't auto-reject
+    # This catches articles ABOUT satire which are NOT satire themselves
+    needs_llm_review = False
     if doc.text or doc.title:
         combined = normalize((doc.title or "") + " " + (doc.meta.get("description", "") or ""))
         if any(normalize(kw) in combined for kw in SATIRE_KEYWORDS):
-            return True, "Satire/parody signals detected in page metadata"
+            needs_llm_review = True
 
-    return False, ""
+    return False, "", needs_llm_review
 
 
 # -----------------------------------------------------------------------------
@@ -1261,17 +1280,32 @@ def evaluate_source(
     )
 
     # Check auto-reject first
-    should_reject, reject_reason = check_auto_reject(main)
+    should_reject, reject_reason, needs_llm_satire_review = check_auto_reject(main)
 
-    # LLM augmentation: verify satire detection on borderline cases
+    # LLM is the decision-maker for satire on non-obvious cases
     if not should_reject and llm_client and main.text:
-        # Check if content might be satirical even without keyword matches
-        llm_satire = llm_assess_satire(llm_client, main.title or "", main.text, main.domain, llm_model)
-        if llm_satire and llm_satire[0]:
-            should_reject = True
-            reject_reason = f"LLM detected satire: {llm_satire[1]}"
+        # If satire signals in metadata OR proactive check, ask LLM to decide
+        if needs_llm_satire_review:
+            # Metadata had satire keywords - LLM must determine if it's satire or journalism ABOUT satire
+            llm_satire = llm_assess_satire(llm_client, main.title or "", main.text, main.domain, llm_model)
             result.llm_used = True
-            result.llm_decisions.append("satire_detection")
+            result.llm_decisions.append("satire_verification")
+            if llm_satire and llm_satire[0]:
+                should_reject = True
+                reject_reason = f"LLM confirmed satire: {llm_satire[1]}"
+            # If LLM says NOT satire, we continue (don't reject)
+        else:
+            # No metadata signals - still do a lightweight check for edge cases
+            llm_satire = llm_assess_satire(llm_client, main.title or "", main.text, main.domain, llm_model)
+            if llm_satire and llm_satire[0]:
+                should_reject = True
+                reject_reason = f"LLM detected satire: {llm_satire[1]}"
+                result.llm_used = True
+                result.llm_decisions.append("satire_detection")
+
+    # If no LLM available and satire signals detected, add warning but don't reject
+    if not should_reject and not llm_client and needs_llm_satire_review:
+        result.warnings.append("Satire keywords in metadata - manual review recommended")
 
     if should_reject:
         result.use_permission = UsePermission.DO_NOT_USE
