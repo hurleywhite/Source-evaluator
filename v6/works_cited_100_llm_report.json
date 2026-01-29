@@ -3,8 +3,8 @@
     "url": "https://news.mingpao.com/pns/%E4%B8%AD%E5%9C%8B/article/20200918/s00013/1600366615408/%E5%AE%98%E6%96%B9%E7%A8%B1%E6%96%B0%E5%86%A0%E5%B1%AC%E8%87%AA%E7%84%B6%E7%81%BD%E5%AE%B3-%E6%AD%A6%E6%BC%A2%E9%81%BA%E5%B1%AC%E8%88%88%E8%A8%9F%E8%A2%AB%E6%8B%92",
     "final_url": "https://news.mingpao.com/pns/%E4%B8%AD%E5%9C%8B/section/20260128/s00013",
     "domain": "mingpao.com",
-    "use_permission": "C: Context-only",
-    "permission_reason": "Evidence too weak for factual support - use as context only",
+    "use_permission": "B: Usable with safeguards",
+    "permission_reason": "Evidence too weak for factual support - use as context only [LLM upgraded: The source includes specific details about events and statements from government officials, which provide some verifiable information. However, it also contains opinion and analysis that would require further fact-checking before using it as a primary source.]",
     "core_checks": {
       "intended_use": "B",
       "relationship": {
@@ -65,9 +65,11 @@
         "https://news.mingpao.com/pns/%E4%B8%AD%E5%9C%8B/section/20260128/s00013"
       ],
       "warnings": [],
-      "llm_used": false,
+      "llm_used": true,
       "llm_error": "",
-      "llm_decisions": []
+      "llm_decisions": [
+        "final_review_upgrade"
+      ]
     }
   },
   {
@@ -81,7 +83,7 @@
       "relationship": {
         "type": "third_party",
         "a_only_restriction": false,
-        "reason": "Third-party research/advocacy organization reporting on external actors"
+        "reason": "Third-party source - potentially eligible for B use"
       },
       "completeness": {
         "status": "complete",
@@ -244,8 +246,8 @@
         "reason": "Full content retrieved (2692 chars)"
       },
       "evidence_strength": {
-        "level": "medium",
-        "reason": "Assertions without clear evidence trail [LLM: Contains some verifiable claims but lacks primary evidence and clear attribution]",
+        "level": "weak",
+        "reason": "Assertions without clear evidence trail",
         "quotes": []
       },
       "specificity": {
@@ -300,11 +302,9 @@
         "https://east-turkistan.net/contact/"
       ],
       "warnings": [],
-      "llm_used": true,
+      "llm_used": false,
       "llm_error": "",
-      "llm_decisions": [
-        "evidence_strength"
-      ]
+      "llm_decisions": []
     }
   },
   {
@@ -432,7 +432,7 @@
       "severity_support": {
         "claim_detected": true,
         "status": "partial",
-        "reason": "Partial severity support. Missing: extent (severity of harm)",
+        "reason": "Partial severity support. Missing: extent (severity of harm) [LLM: The text provides some information about the political power consolidation and lack of opposition to Xi Jinping's rule, but does not contain any clear evidence of systematic or widespread human rights violations.]",
         "missing": [
           "extent (severity of harm)"
         ]
@@ -522,7 +522,7 @@
       "severity_support": {
         "claim_detected": true,
         "status": "partial",
-        "reason": "Claim appears systematic but evidence incomplete. Missing: extent (severity of harm), systematicity (pattern/frequency)",
+        "reason": "Claim appears systematic but evidence incomplete. Missing: extent (severity of harm), systematicity (pattern/frequency) [LLM: The text does not provide clear evidence of systematic or widespread human rights violations. It discusses the Chinese government's efforts to regulate online speech and combat the spread of 'rumors', which could potentially be used to restrict freedom of expression. However, the text does not provide specific details about the scale, severity, or systematicity of any human rights abuses.]",
         "missing": [
           "extent (severity of harm)",
           "systematicity (pattern/frequency)"
@@ -653,7 +653,7 @@
     "final_url": "https://www.wired.com/story/uyghur-internet-erased-china/",
     "domain": "wired.com",
     "use_permission": "B: Usable with safeguards",
-    "permission_reason": "Evidence too weak for factual support - use as context only [LLM upgraded: The source provides specific details about the impact of government repression on the technology sector in Xinjiang, including the arrest of individuals and the blocking of websites. While some of the claims are not directly verified, the overall context and details provided lend credibility to the analysis.]",
+    "permission_reason": "Secondary reporting - must corroborate for key claims",
     "core_checks": {
       "intended_use": "B",
       "relationship": {
@@ -666,8 +666,8 @@
         "reason": "Full content retrieved (3288 chars) despite access warnings"
       },
       "evidence_strength": {
-        "level": "weak",
-        "reason": "Assertions without clear evidence trail",
+        "level": "medium",
+        "reason": "Assertions without clear evidence trail [LLM: some direct quotes and verifiable details, but mostly anecdotal evidence]",
         "quotes": []
       },
       "specificity": {
@@ -686,10 +686,11 @@
       "severity_support": {
         "claim_detected": true,
         "status": "partial",
-        "reason": "Partial severity support. Missing: systematicity (pattern/frequency) [LLM: The text provides some evidence of systematic human rights violations targeting the Uyghur IT sector, including arrests, censorship, and internet shutdowns. However, it lacks clear data on the scale and severity of the harm, as well as the extent to which these actions are institutionalized and widespread across Xinjiang.]",
+        "reason": "Partial severity support. Missing: systematicity (pattern/frequency) [LLM: The text provides some evidence of human rights violations, such as the targeting and arrests of Uyghur IT professionals and the severe restrictions on online freedom. However, the text does not provide enough information to conclusively determine the scale, systematicity, and institutionalization of these issues.]",
         "missing": [
-          "extent of harm (deaths, detentions, injuries, numbers affected)",
-          "systematicity (pattern/frequency of violations over time)"
+          "EXTENT: Scale/severity of harm (deaths, detentions, injuries, numbers affected)",
+          "SYSTEMATICITY: Pattern/frequency (ongoing, routine, widespread, over time)",
+          "INSTITUTIONALIZATION: State apparatus involvement (laws, policies, agencies, officials)"
         ]
       }
     },
@@ -726,8 +727,8 @@
       "llm_used": true,
       "llm_error": "",
       "llm_decisions": [
-        "severity_support",
-        "final_review_upgrade"
+        "evidence_strength",
+        "severity_support"
       ]
     }
   },
@@ -771,7 +772,7 @@
       "severity_support": {
         "claim_detected": true,
         "status": "partial",
-        "reason": "Partial severity support. Missing: extent (severity of harm) [LLM: The article provides some evidence of wealth accumulation by Wen Jiabao's family, which could indicate potential conflicts of interest or abuse of influence. However, it does not provide clear evidence of systematic or widespread human rights violations. The article is missing information on the extent (severity) of any harms caused.]",
+        "reason": "Partial severity support. Missing: extent (severity of harm) [LLM: The text provides evidence of wealth accumulation by the family members of Premier Wen Jiabao, which suggests some degree of abuse of power. However, the text does not provide clear evidence of the scale, severity or systematic nature of the reported human rights violations.]",
         "missing": [
           "extent (severity of harm)"
         ]
@@ -905,7 +906,7 @@
       "relationship": {
         "type": "third_party",
         "a_only_restriction": false,
-        "reason": "Third-party research/advocacy organization reporting on external actors"
+        "reason": "Third-party source - potentially eligible for B use"
       },
       "completeness": {
         "status": "failed",
@@ -978,7 +979,7 @@
       "relationship": {
         "type": "third_party",
         "a_only_restriction": false,
-        "reason": "Third-party research/advocacy organization reporting on external actors"
+        "reason": "Third-party source - potentially eligible for B use"
       },
       "completeness": {
         "status": "complete",
@@ -1090,11 +1091,10 @@
       "severity_support": {
         "claim_detected": true,
         "status": "partial",
-        "reason": "Claim appears systematic but evidence incomplete. Missing: extent (severity of harm), systematicity (pattern/frequency) [LLM: The text provides evidence of a targeted plot against specific critics of China, but does not provide comprehensive information on the scale, frequency, or institutional involvement in such actions to support claims of systematic/widespread human rights violations.]",
+        "reason": "Claim appears systematic but evidence incomplete. Missing: extent (severity of harm), systematicity (pattern/frequency) [LLM: The text provides some evidence of transnational repression tactics used against critics of China, such as the elaborate plot to make false bomb threats. However, it does not provide clear evidence of the extent or systematicity of such human rights violations.]",
         "missing": [
-          "extent (severity of harm)",
-          "systematicity (pattern/frequency)",
-          "institutionalization (state apparatus involvement)"
+          "evidence of the scale/severity of harm caused by these tactics",
+          "evidence of a clear pattern or frequency of such incidents over time"
         ]
       }
     },
@@ -1147,7 +1147,7 @@
       "relationship": {
         "type": "third_party",
         "a_only_restriction": false,
-        "reason": "Third-party research/advocacy organization reporting on external actors"
+        "reason": "Third-party source - potentially eligible for B use"
       },
       "completeness": {
         "status": "failed",
@@ -1300,7 +1300,7 @@
       "relationship": {
         "type": "third_party",
         "a_only_restriction": false,
-        "reason": "Third-party research/advocacy organization reporting on external actors"
+        "reason": "Third-party source - potentially eligible for B use"
       },
       "completeness": {
         "status": "complete",
@@ -1382,7 +1382,7 @@
       "relationship": {
         "type": "third_party",
         "a_only_restriction": false,
-        "reason": "Third-party research/advocacy organization reporting on external actors"
+        "reason": "Third-party source - potentially eligible for B use"
       },
       "completeness": {
         "status": "complete",
@@ -1412,7 +1412,7 @@
       "severity_support": {
         "claim_detected": true,
         "status": "partial",
-        "reason": "Partial severity support. Missing: systematicity (pattern/frequency) [LLM: The text provides some evidence of systematic human rights violations, such as the lengthy prison sentences, torture, and arbitrary detention of prominent human rights defenders. However, it does not provide clear evidence of the scale, frequency, and institutionalization of these violations across China.]",
+        "reason": "Partial severity support. Missing: systematicity (pattern/frequency) [LLM: The text provides specific details about the imprisonment and mistreatment of two prominent human rights activists, Xu Zhiyong and Ding Jiaxi, which suggests systematic human rights violations. However, the information is focused on these two individuals and does not clearly demonstrate the scale, pattern, and institutionalization of such abuses across China.]",
         "missing": [
           "systematicity (pattern/frequency)"
         ]
@@ -1472,7 +1472,7 @@
       },
       "evidence_strength": {
         "level": "medium",
-        "reason": "Assertions without clear evidence trail [LLM: contains some verifiable claims but lacks primary evidence]",
+        "reason": "Assertions without clear evidence trail [LLM: some specific details but lacks primary sources]",
         "quotes": []
       },
       "specificity": {
@@ -1544,7 +1544,7 @@
       "relationship": {
         "type": "third_party",
         "a_only_restriction": false,
-        "reason": "Third-party research/advocacy organization reporting on external actors"
+        "reason": "Third-party source - potentially eligible for B use"
       },
       "completeness": {
         "status": "failed",
@@ -1617,7 +1617,7 @@
       "relationship": {
         "type": "third_party",
         "a_only_restriction": false,
-        "reason": "Third-party research/advocacy organization reporting on external actors"
+        "reason": "Third-party source - potentially eligible for B use"
       },
       "completeness": {
         "status": "complete",
@@ -1700,7 +1700,7 @@
       "relationship": {
         "type": "third_party",
         "a_only_restriction": false,
-        "reason": "Third-party research/advocacy organization reporting on external actors"
+        "reason": "Third-party source - potentially eligible for B use"
       },
       "completeness": {
         "status": "complete",
@@ -1783,7 +1783,7 @@
       "relationship": {
         "type": "third_party",
         "a_only_restriction": false,
-        "reason": "Third-party research/advocacy organization reporting on external actors"
+        "reason": "Third-party source - potentially eligible for B use"
       },
       "completeness": {
         "status": "failed",
@@ -1930,7 +1930,7 @@
       "relationship": {
         "type": "third_party",
         "a_only_restriction": false,
-        "reason": "Third-party research/advocacy organization reporting on external actors"
+        "reason": "Third-party source - potentially eligible for B use"
       },
       "completeness": {
         "status": "complete",
@@ -2039,10 +2039,10 @@
       "severity_support": {
         "claim_detected": true,
         "status": "partial",
-        "reason": "Partial severity support. Missing: extent (severity of harm) [LLM: The text provides some background information on the National People's Congress (NPC) in China, but does not directly address claims of systematic or widespread human rights violations. The text focuses more on the political process and structure of the NPC, without delving into potential human rights issues.]",
+        "reason": "Partial severity support. Missing: extent (severity of harm) [LLM: The text provides some background information on the Chinese government and the National People's Congress, but does not contain explicit evidence of systematic or widespread human rights violations.]",
         "missing": [
           "extent (severity of harm)",
-          "systematicity (pattern/frequency of abuses)",
+          "systematicity (pattern/frequency of abuse)",
           "institutionalization (state apparatus involvement)"
         ]
       }
@@ -2098,7 +2098,7 @@
       "relationship": {
         "type": "third_party",
         "a_only_restriction": false,
-        "reason": "Third-party research/advocacy organization reporting on external actors"
+        "reason": "Third-party source - potentially eligible for B use"
       },
       "completeness": {
         "status": "complete",
@@ -2181,7 +2181,7 @@
       "relationship": {
         "type": "third_party",
         "a_only_restriction": false,
-        "reason": "Third-party research/advocacy organization reporting on external actors"
+        "reason": "Third-party source - potentially eligible for B use"
       },
       "completeness": {
         "status": "complete",
@@ -2265,7 +2265,7 @@
       "relationship": {
         "type": "third_party",
         "a_only_restriction": false,
-        "reason": "Third-party research/advocacy organization reporting on external actors"
+        "reason": "Third-party source - potentially eligible for B use"
       },
       "completeness": {
         "status": "complete",
@@ -2342,37 +2342,37 @@
     "url": "http://www.npc.gov.cn/englishnpc/constitution2019/201911/1f65146fb6104dd3a2793875d19b5b29.shtml",
     "final_url": "http://www.npc.gov.cn/npc/index.html",
     "domain": "npc.gov.cn",
-    "use_permission": "Do not use",
-    "permission_reason": "LLM detected satire: Content appears to be satirizing Chinese government and leadership",
+    "use_permission": "Manual retrieval needed",
+    "permission_reason": "Partial content retrieved - manual retrieval needed for B use",
     "core_checks": {
-      "intended_use": "C",
+      "intended_use": "B",
       "relationship": {
-        "type": "unknown",
-        "a_only_restriction": false,
-        "reason": ""
+        "type": "official_state",
+        "a_only_restriction": true,
+        "reason": "Official government/state source - treat claims as narrative unless corroborated"
       },
       "completeness": {
-        "status": "failed",
-        "reason": ""
+        "status": "partial",
+        "reason": "Limited text retrieved (244 chars)"
       },
       "evidence_strength": {
-        "level": "not_assessed",
-        "reason": "",
+        "level": "weak",
+        "reason": "Assertions without clear evidence trail",
         "quotes": []
       },
       "specificity": {
         "has_anchors": false,
-        "reason": "",
+        "reason": "No clear who/what/when/where/how much anchors found",
         "anchors": []
       },
       "corroboration": {
         "status": "not_assessed",
-        "reason": ""
+        "reason": "Cross-source corroboration check not implemented in this run"
       },
       "severity_support": {
         "claim_detected": false,
         "status": "not_applicable",
-        "reason": "",
+        "reason": "No systematic/widespread claims detected",
         "missing": []
       }
     },
@@ -2400,13 +2400,16 @@
       "fetch_status": "ok",
       "content_type": "text/html",
       "text_length": 244,
-      "evidence_pages": [],
+      "evidence_pages": [
+        "http://www.npc.gov.cn/npc/index.html",
+        "http://www.npc.gov.cn/npc/index.html",
+        "http://www.npc.gov.cn/npc/index.html",
+        "http://www.npc.gov.cn/npc/index.html"
+      ],
       "warnings": [],
-      "llm_used": true,
+      "llm_used": false,
       "llm_error": "",
-      "llm_decisions": [
-        "satire_detection"
-      ]
+      "llm_decisions": []
     }
   },
   {
@@ -3024,13 +3027,13 @@
     "final_url": "https://east-turkistan.net/east-turkistan-government-in-exile-empowers-democracy-with-landmark-parliamentary-candidate-elections-in-europe/",
     "domain": "east-turkistan.net",
     "use_permission": "A: Narrative-only",
-    "permission_reason": "Self-interest/official source: Official government/state source - treat claims as narrative unless corroborated",
+    "permission_reason": "Self-interest/official source: LLM detected self-interest: Source is the East Turkistan Government-in-Exile describing its own elections",
     "core_checks": {
       "intended_use": "B",
       "relationship": {
-        "type": "official_state",
+        "type": "self_interest",
         "a_only_restriction": true,
-        "reason": "Official government/state source - treat claims as narrative unless corroborated"
+        "reason": "LLM detected self-interest: Source is the East Turkistan Government-in-Exile describing its own elections"
       },
       "completeness": {
         "status": "complete",
@@ -3057,9 +3060,11 @@
       "severity_support": {
         "claim_detected": true,
         "status": "partial",
-        "reason": "Partial severity support. Missing: extent (severity of harm) [LLM: The text provides some information about elections and representative bodies of the East Turkistan Government-in-Exile, but does not directly address claims of systematic/widespread human rights violations.]",
+        "reason": "Partial severity support. Missing: extent (severity of harm) [LLM: The text provides some information about parliamentary elections held by the East Turkistan Government-in-Exile (ETGE), but it does not contain any direct evidence of systematic or widespread human rights violations. The text focuses on the electoral process and the ETGE's efforts to establish a democratic government-in-exile, but it does not mention the specific human rights situation within East Turkistan.]",
         "missing": [
-          "extent (severity of harm)"
+          "extent (severity of harm)",
+          "systematicity (pattern/frequency of abuses)",
+          "institutionalization (state apparatus involvement)"
         ]
       }
     },
@@ -3098,6 +3103,7 @@
       "llm_used": true,
       "llm_error": "",
       "llm_decisions": [
+        "self_interest",
         "severity_support"
       ]
     }
@@ -3268,13 +3274,13 @@
     "final_url": "https://www.cbc.ca/news/editorsblog/brodie-fenlon-blog-china-1.6636644",
     "domain": "cbc.ca",
     "use_permission": "A: Narrative-only",
-    "permission_reason": "Self-interest/official source: LLM detected self-interest: The source describes the CBC's journalism and bureaus",
+    "permission_reason": "Self-interest/official source: LLM detected self-interest: The source is an editorial blog describing the CBC's journalism practices",
     "core_checks": {
       "intended_use": "B",
       "relationship": {
         "type": "self_interest",
         "a_only_restriction": true,
-        "reason": "LLM detected self-interest: The source describes the CBC's journalism and bureaus"
+        "reason": "LLM detected self-interest: The source is an editorial blog describing the CBC's journalism practices"
       },
       "completeness": {
         "status": "complete",
@@ -3383,7 +3389,7 @@
       "severity_support": {
         "claim_detected": true,
         "status": "partial",
-        "reason": "Partial severity support. Missing: extent (severity of harm)",
+        "reason": "Partial severity support. Missing: extent (severity of harm) [LLM: The provided text describes the establishment of a judicial system for handling certain types of politically or socially sensitive cases in China, but does not provide specific details on the severity or scale of any human rights violations. More information would be needed to fully assess whether the text supports claims of systematic or widespread human rights abuses.]",
         "missing": [
           "extent (severity of harm)"
         ]
@@ -3418,9 +3424,11 @@
         "https://supremepeoplescourtmonitor.com/about-me/"
       ],
       "warnings": [],
-      "llm_used": false,
+      "llm_used": true,
       "llm_error": "",
-      "llm_decisions": []
+      "llm_decisions": [
+        "severity_support"
+      ]
     }
   },
   {
@@ -3590,7 +3598,7 @@
       "relationship": {
         "type": "third_party",
         "a_only_restriction": false,
-        "reason": "Third-party research/advocacy organization reporting on external actors"
+        "reason": "Third-party source - potentially eligible for B use"
       },
       "completeness": {
         "status": "complete",
@@ -3670,21 +3678,21 @@
     "final_url": "https://blog.google/threat-analysis-group/tag-bulletin-q4-2022/",
     "domain": "blog.google",
     "use_permission": "B: Usable with safeguards",
-    "permission_reason": "Evidence too weak for factual support - use as context only [LLM upgraded: The text contains detailed information about coordinated influence operations terminated by the Threat Analysis Group, including specific details about the number of channels and websites involved, the countries and languages targeted, and the content of the campaigns. While the source is not a primary one, the level of detail and specificity provided makes this a usable source with appropriate safeguards.]",
+    "permission_reason": "Secondary reporting - must corroborate for key claims",
     "core_checks": {
       "intended_use": "B",
       "relationship": {
         "type": "third_party",
         "a_only_restriction": false,
-        "reason": "Third-party research/advocacy organization reporting on external actors"
+        "reason": "Third-party source - potentially eligible for B use"
       },
       "completeness": {
         "status": "complete",
         "reason": "Full content retrieved (7603 chars) despite access warnings"
       },
       "evidence_strength": {
-        "level": "weak",
-        "reason": "Assertions without clear evidence trail",
+        "level": "medium",
+        "reason": "Assertions without clear evidence trail [LLM: has some verifiable claims but lacks primary evidence and clear attribution]",
         "quotes": []
       },
       "specificity": {
@@ -3743,7 +3751,7 @@
       "llm_used": true,
       "llm_error": "",
       "llm_decisions": [
-        "final_review_upgrade"
+        "evidence_strength"
       ]
     }
   },
@@ -3758,7 +3766,7 @@
       "relationship": {
         "type": "third_party",
         "a_only_restriction": false,
-        "reason": "Third-party research/advocacy organization reporting on external actors"
+        "reason": "Third-party source - potentially eligible for B use"
       },
       "completeness": {
         "status": "complete",
@@ -3835,13 +3843,13 @@
     "final_url": "http://tibetoffice.org/media-press/commentaries-opinions/the-legitimacy-and-role-of-the-central-tibetan-administration",
     "domain": "tibetoffice.org",
     "use_permission": "A: Narrative-only",
-    "permission_reason": "Self-interest/official source: LLM detected self-interest: The source is an official of the Central Tibetan Administration",
+    "permission_reason": "Self-interest/official source: LLM detected self-interest: The source is making claims about the Central Tibetan Administration itself",
     "core_checks": {
       "intended_use": "B",
       "relationship": {
         "type": "self_interest",
         "a_only_restriction": true,
-        "reason": "LLM detected self-interest: The source is an official of the Central Tibetan Administration"
+        "reason": "LLM detected self-interest: The source is making claims about the Central Tibetan Administration itself"
       },
       "completeness": {
         "status": "complete",
@@ -3927,7 +3935,7 @@
       },
       "evidence_strength": {
         "level": "medium",
-        "reason": "Assertions without clear evidence trail [LLM: some interviews but lacks primary evidence and specific details]",
+        "reason": "Assertions without clear evidence trail [LLM: Uses interviews but lacks primary evidence and specific verifiable details]",
         "quotes": []
       },
       "specificity": {
@@ -4063,43 +4071,37 @@
     "url": "https://www.bbc.com/news/world-asia-20518929",
     "final_url": "https://www.bbc.com/news/world-asia-20518929",
     "domain": "bbc.com",
-    "use_permission": "B: Usable with safeguards",
-    "permission_reason": "Secondary reporting - must corroborate for key claims",
+    "use_permission": "Do not use",
+    "permission_reason": "LLM detected satire: The BBC article is reporting on a satirical Onion article.",
     "core_checks": {
-      "intended_use": "B",
+      "intended_use": "C",
       "relationship": {
-        "type": "third_party",
+        "type": "unknown",
         "a_only_restriction": false,
-        "reason": "Third-party source - potentially eligible for B use"
+        "reason": ""
       },
       "completeness": {
-        "status": "complete",
-        "reason": "Full content retrieved (3342 chars)"
+        "status": "failed",
+        "reason": ""
       },
       "evidence_strength": {
-        "level": "medium",
-        "reason": "Secondary reporting with attribution",
-        "quotes": [
-          "s Daily in turn published the story on 27 November, citing Guangming Daily as its source. The Onion said previous winners of its Sexiest Man Alive prize included Syrian President Bashar al-Assad and US fi",
-          "irstyle and, of course, that famous smile.\" \"I wouldn't say I'm surprised,\" Onion editor Will Tracy told the BBC, responding to the People's Daily feature. \"I mean, this kind of thing has happened in diff"
-        ]
+        "level": "not_assessed",
+        "reason": "",
+        "quotes": []
       },
       "specificity": {
-        "has_anchors": true,
-        "reason": "Contains traceable anchors: dates/times (3 found); named actors (7 found)",
-        "anchors": [
-          "dates/times (3 found)",
-          "named actors (7 found)"
-        ]
+        "has_anchors": false,
+        "reason": "",
+        "anchors": []
       },
       "corroboration": {
         "status": "not_assessed",
-        "reason": "Cross-source corroboration check not implemented in this run"
+        "reason": ""
       },
       "severity_support": {
         "claim_detected": false,
         "status": "not_applicable",
-        "reason": "No systematic/widespread claims detected",
+        "reason": "",
         "missing": []
       }
     },
@@ -4127,14 +4129,13 @@
       "fetch_status": "ok",
       "content_type": "text/html",
       "text_length": 3342,
-      "evidence_pages": [
-        "https://www.bbc.com/news/world-asia-20518929",
-        "https://www.bbc.com/contact"
-      ],
+      "evidence_pages": [],
       "warnings": [],
-      "llm_used": false,
+      "llm_used": true,
       "llm_error": "",
-      "llm_decisions": []
+      "llm_decisions": [
+        "satire_detection"
+      ]
     }
   },
   {
@@ -4386,14 +4387,14 @@
     "url": "https://www.chinadaily.com.cn/a/202108/06/WS610c9a2ba310efa1bd6671b2.html",
     "final_url": "https://www.chinadaily.com.cn/a/202108/06/WS610c9a2ba310efa1bd6671b2.html",
     "domain": "chinadaily.com.cn",
-    "use_permission": "B: Usable with safeguards",
-    "permission_reason": "Secondary reporting - must corroborate for key claims",
+    "use_permission": "A: Narrative-only",
+    "permission_reason": "Self-interest/official source: State-affiliated media - treat claims as narrative",
     "core_checks": {
       "intended_use": "B",
       "relationship": {
-        "type": "third_party",
-        "a_only_restriction": false,
-        "reason": "Third-party source - potentially eligible for B use"
+        "type": "official_state",
+        "a_only_restriction": true,
+        "reason": "State-affiliated media - treat claims as narrative"
       },
       "completeness": {
         "status": "complete",
@@ -4464,14 +4465,14 @@
     "url": "https://mediabiasfactcheck.com/china-daily/",
     "final_url": "https://mediabiasfactcheck.com/china-daily/",
     "domain": "mediabiasfactcheck.com",
-    "use_permission": "A: Narrative-only",
-    "permission_reason": "Self-interest/official source: LLM detected self-interest: China Daily is owned and funded by the Chinese government",
+    "use_permission": "C: Context-only",
+    "permission_reason": "Evidence too weak for factual support - use as context only",
     "core_checks": {
       "intended_use": "B",
       "relationship": {
-        "type": "self_interest",
-        "a_only_restriction": true,
-        "reason": "LLM detected self-interest: China Daily is owned and funded by the Chinese government"
+        "type": "third_party",
+        "a_only_restriction": false,
+        "reason": "Third-party source - potentially eligible for B use"
       },
       "completeness": {
         "status": "complete",
@@ -4540,11 +4541,9 @@
         "https://mediabiasfactcheck.com/ethics-public-policy-center-eppc/"
       ],
       "warnings": [],
-      "llm_used": true,
+      "llm_used": false,
       "llm_error": "",
-      "llm_decisions": [
-        "self_interest"
-      ]
+      "llm_decisions": []
     }
   },
   {
@@ -4634,13 +4633,13 @@
     "final_url": "https://www.bbc.com/news/world-asia-china-57780023",
     "domain": "bbc.com",
     "use_permission": "A: Narrative-only",
-    "permission_reason": "Self-interest/official source: LLM detected self-interest: The source describes vloggers cooperating with Chinese state media",
+    "permission_reason": "Self-interest/official source: LLM detected self-interest: Vloggers are making claims about their own motives and actions",
     "core_checks": {
       "intended_use": "B",
       "relationship": {
         "type": "self_interest",
         "a_only_restriction": true,
-        "reason": "LLM detected self-interest: The source describes vloggers cooperating with Chinese state media"
+        "reason": "LLM detected self-interest: Vloggers are making claims about their own motives and actions"
       },
       "completeness": {
         "status": "complete",
@@ -4715,13 +4714,13 @@
     "final_url": "https://www.reddit.com/r/China/comments/mittq2/the_case_of_cgtns_fake_french_journalist_keeps/",
     "domain": "reddit.com",
     "use_permission": "A: Narrative-only",
-    "permission_reason": "Self-interest/official source: LLM detected self-interest: Claims made about CGTN and its 'fake' journalist Laurene",
+    "permission_reason": "Self-interest/official source: LLM detected self-interest: The source makes claims about the identity of a CGTN journalist",
     "core_checks": {
       "intended_use": "B",
       "relationship": {
         "type": "self_interest",
         "a_only_restriction": true,
-        "reason": "LLM detected self-interest: Claims made about CGTN and its 'fake' journalist Laurene"
+        "reason": "LLM detected self-interest: The source makes claims about the identity of a CGTN journalist"
       },
       "completeness": {
         "status": "complete",
@@ -4801,7 +4800,7 @@
       "relationship": {
         "type": "self_interest",
         "a_only_restriction": true,
-        "reason": "LLM detected self-interest: The source provides extensive information about its own organization"
+        "reason": "LLM detected self-interest: The source discusses the background and operations of the Global Times"
       },
       "completeness": {
         "status": "complete",
@@ -4832,7 +4831,7 @@
       "severity_support": {
         "claim_detected": true,
         "status": "partial",
-        "reason": "Partial severity support. Missing: extent (severity of harm) [LLM: The text provides some information about the Global Times, its role as a Chinese state media outlet, and its nationalist/pro-CCP editorial stance. However, it does not contain direct evidence of systematic or widespread human rights violations. The text is missing information about the extent (severity and scale) of any potential human rights abuses.]",
+        "reason": "Partial severity support. Missing: extent (severity of harm)",
         "missing": [
           "extent (severity of harm)"
         ]
@@ -4918,11 +4917,9 @@
       "severity_support": {
         "claim_detected": true,
         "status": "partial",
-        "reason": "Partial severity support. Missing: extent (severity of harm) [LLM: The text does not provide evidence of systematic or widespread human rights violations. It focuses on analyzing media bias in China, and does not mention any specific human rights abuses. The text is missing evidence on the extent, systematicity, and institutionalization of human rights violations.]",
+        "reason": "Partial severity support. Missing: extent (severity of harm)",
         "missing": [
-          "extent (scale/severity of harm)",
-          "systematicity (pattern/frequency)",
-          "institutionalization (state apparatus involvement)"
+          "extent (severity of harm)"
         ]
       }
     },
@@ -4974,7 +4971,7 @@
       "relationship": {
         "type": "third_party",
         "a_only_restriction": false,
-        "reason": "Third-party research/advocacy organization reporting on external actors"
+        "reason": "Third-party source - potentially eligible for B use"
       },
       "completeness": {
         "status": "complete",
@@ -5314,9 +5311,11 @@
       "severity_support": {
         "claim_detected": true,
         "status": "partial",
-        "reason": "Partial severity support. Missing: extent (severity of harm) [LLM: The text provides some evidence of human rights violations in China, particularly regarding the surveillance and persecution of the Uyghur population in Xinjiang. However, the text also suggests that the fears around the social credit system may be overblown and not yet fully implemented nationwide. More information is needed on the scale and severity of these abuses to determine if they constitute systematic or widespread violations.]",
+        "reason": "Partial severity support. Missing: extent (severity of harm) [LLM: The text provides some information on the social credit system in China and discusses concerns about human rights abuses, but does not provide clear evidence on the extent, systematicity, or institutionalization of these abuses.]",
         "missing": [
-          "extent (severity of harm)"
+          "extent (severity of harm)",
+          "systematicity (pattern/frequency)",
+          "institutionalization (state apparatus involvement)"
         ]
       }
     },
@@ -5512,8 +5511,8 @@
     "url": "http://www.cnfocus.com/debunking-the-chinese-debttrap-narrative-in-3-steps/",
     "final_url": "http://www.cnfocus.com/debunking-the-chinese-debttrap-narrative-in-3-steps/",
     "domain": "cnfocus.com",
-    "use_permission": "C: Context-only",
-    "permission_reason": "Evidence too weak for factual support - use as context only",
+    "use_permission": "B: Usable with safeguards",
+    "permission_reason": "Evidence too weak for factual support - use as context only [LLM upgraded: The article provides a detailed analysis with supporting data from official government sources, addressing key aspects of the 'debt-trap' narrative systematically. While it expresses some opinions, the core claims are well-substantiated, making it suitable for use with appropriate safeguards.]",
     "core_checks": {
       "intended_use": "B",
       "relationship": {
@@ -5547,11 +5546,9 @@
       "severity_support": {
         "claim_detected": true,
         "status": "partial",
-        "reason": "Partial severity support. Missing: extent (severity of harm) [LLM: The text provides some information about the composition of foreign debt in countries like Sri Lanka and Kenya, suggesting that China's share is relatively small compared to other creditors. However, it does not directly address the extent or systematicity of any alleged human rights violations.]",
+        "reason": "Partial severity support. Missing: extent (severity of harm)",
         "missing": [
-          "extent (severity of harm)",
-          "systematicity (pattern/frequency)",
-          "institutionalization (state apparatus involvement)"
+          "extent (severity of harm)"
         ]
       }
     },
@@ -5591,7 +5588,8 @@
       "llm_used": true,
       "llm_error": "",
       "llm_decisions": [
-        "severity_support"
+        "severity_support",
+        "final_review_upgrade"
       ]
     }
   },
@@ -6098,7 +6096,7 @@
       },
       "evidence_strength": {
         "level": "medium",
-        "reason": "Assertions without clear evidence trail [LLM: contains some primary data but lacks full source attribution]",
+        "reason": "Assertions without clear evidence trail [LLM: some evidence, attribution, and specific details, but lacks primary sources]",
         "quotes": []
       },
       "specificity": {
@@ -6374,7 +6372,7 @@
       "severity_support": {
         "claim_detected": true,
         "status": "partial",
-        "reason": "Partial severity support. Missing: extent (severity of harm) [LLM: The text provides some evidence of systematic and widespread human rights violations by China, such as the author's claim that China has an 'ambitious international agenda to supplant the United States and 'avenge or wipe clean past foreign humiliations''. However, the text does not provide explicit details on the extent (scale/severity) of the alleged human rights violations. More information is needed on specific incidents, numbers affected, and the involvement of state institutions.]",
+        "reason": "Partial severity support. Missing: extent (severity of harm) [LLM: The text does not provide clear evidence of systematic or widespread human rights violations. It focuses more on China's strategic intentions and deception towards the United States. While it mentions China's crackdown on Tiananmen Square, it does not provide details on the scale, severity or institutionalization of human rights abuses.]",
         "missing": [
           "extent (severity of harm)"
         ]
@@ -6429,7 +6427,7 @@
     "final_url": "https://www.cnn.com/2012/11/27/world/asia/north-korea-china-onion",
     "domain": "cnn.com",
     "use_permission": "B: Usable with safeguards",
-    "permission_reason": "Lacks traceable anchors (who/what/when/where) - use as context only [LLM upgraded: The source has attribution, with quotes from the Onion editor and the Chinese news website, as well as specific details about the Onion article and the Chinese news coverage. This provides sufficient verifiable claims to consider it usable with appropriate safeguards.]",
+    "permission_reason": "Lacks traceable anchors (who/what/when/where) - use as context only [LLM upgraded: The source provides some verifiable claims, such as the fact that the People's Daily Online published portions of The Onion's satirical story about Kim Jong Un being the 'sexiest man alive'. It also includes commentary and analysis from The Onion's editor. While this is not a primary source, the information appears to be well-sourced and the context provided helps assess the credibility of the claims.]",
     "core_checks": {
       "intended_use": "B",
       "relationship": {
@@ -6583,7 +6581,7 @@
     "final_url": "https://www.facebook.com/TheOnion/videos/china-agrees-to-purchase-11-us-soybeans/1526771408345649/",
     "domain": "facebook.com",
     "use_permission": "Do not use",
-    "permission_reason": "LLM detected satire: The Onion is a well-known satirical news website",
+    "permission_reason": "LLM detected satire: The Onion is a satirical news website",
     "core_checks": {
       "intended_use": "C",
       "relationship": {
@@ -6656,7 +6654,7 @@
     "final_url": "https://www.facebook.com/TheOnion/videos/us-blows-itself-up-so-china-cant-have-it/2311039672628312/",
     "domain": "facebook.com",
     "use_permission": "Do not use",
-    "permission_reason": "LLM detected satire: The Onion is a well-known satirical news website",
+    "permission_reason": "LLM detected satire: The Onion is a satirical news website",
     "core_checks": {
       "intended_use": "C",
       "relationship": {
@@ -6728,44 +6726,37 @@
     "url": "https://onion20.substack.com/p/june-2005-the-onion-listed-everything-that-can-go-wrong",
     "final_url": "https://onion20.substack.com/p/june-2005-the-onion-listed-everything-that-can-go-wrong",
     "domain": "substack.com",
-    "use_permission": "B: Preferred evidence",
-    "permission_reason": "Strong primary anchors, complete access, traceable",
+    "use_permission": "Do not use",
+    "permission_reason": "LLM detected satire: This is a parody/analysis of The Onion's content from 2005.",
     "core_checks": {
-      "intended_use": "B",
+      "intended_use": "C",
       "relationship": {
-        "type": "third_party",
+        "type": "unknown",
         "a_only_restriction": false,
-        "reason": "Third-party source - potentially eligible for B use"
+        "reason": ""
       },
       "completeness": {
-        "status": "complete",
-        "reason": "Full content retrieved (12783 chars) despite access warnings"
+        "status": "failed",
+        "reason": ""
       },
       "evidence_strength": {
-        "level": "strong",
-        "reason": "Contains primary anchors: court, verdict",
-        "quotes": [
-          "looked like in 2005 and today . There’s no archive of the 2015 issue page. The front-page image is courtesy of former Onion Editor-in-Chief Scott Dikkers. Check out his Substack his latest book These 2 jo",
-          "d ever encounter. It’s a long list! Plus, we’ll explore The Onion’s reaction to the Michael Jackson verdict — and why it didn’t make the newspaper. If you’re new here, welcome! Please sign up below. We publi"
-        ]
+        "level": "not_assessed",
+        "reason": "",
+        "quotes": []
       },
       "specificity": {
-        "has_anchors": true,
-        "reason": "Contains traceable anchors: dates/times (18 found); locations (3 found); named actors (14 found)",
-        "anchors": [
-          "dates/times (18 found)",
-          "locations (3 found)",
-          "named actors (14 found)"
-        ]
+        "has_anchors": false,
+        "reason": "",
+        "anchors": []
       },
       "corroboration": {
         "status": "not_assessed",
-        "reason": "Cross-source corroboration check not implemented in this run"
+        "reason": ""
       },
       "severity_support": {
         "claim_detected": false,
         "status": "not_applicable",
-        "reason": "No systematic/widespread claims detected",
+        "reason": "",
         "missing": []
       }
     },
@@ -6777,38 +6768,32 @@
         "quotes": []
       },
       "corrections_behavior": {
-        "status": "found",
-        "assessed": true,
-        "reason": "Corrections/accountability policy or practice found",
-        "quotes": [
-          "simply looking for some laughs from the past, please sign up today. Documents Privacy Policy Last Updated: December 1, 2025 Changes in the Last Update About this Privacy Policy Substack Inc. knows you care"
-        ]
+        "status": "not_assessed",
+        "assessed": false,
+        "reason": "Not found in retrieved pages",
+        "quotes": []
       },
       "standards_transparency": {
-        "status": "found",
-        "assessed": true,
-        "reason": "Editorial standards or methodology information found",
-        "quotes": [
-          "sts to privacy@substackinc.com. Compliance with applicable laws (including, but not limited to, age verification where required) and protection of Substack’s legitimate business interests and legal rights, includ"
-        ]
+        "status": "not_assessed",
+        "assessed": false,
+        "reason": "Not found in retrieved pages",
+        "quotes": []
       }
     },
     "metadata": {
       "fetch_status": "ok",
       "content_type": "text/html; charset=utf-8",
       "text_length": 12783,
-      "evidence_pages": [
-        "https://onion20.substack.com/p/june-2005-the-onion-listed-everything-that-can-go-wrong",
-        "https://onion20.substack.com/about",
-        "https://substack.com/privacy"
-      ],
+      "evidence_pages": [],
       "warnings": [
         "Bot-block/anti-automation detected",
         "Paywall/login wall detected"
       ],
-      "llm_used": false,
+      "llm_used": true,
       "llm_error": "",
-      "llm_decisions": []
+      "llm_decisions": [
+        "satire_detection"
+      ]
     }
   },
   {
@@ -6976,7 +6961,7 @@
       "relationship": {
         "type": "self_interest",
         "a_only_restriction": true,
-        "reason": "LLM detected self-interest: Source is the state-owned broadcaster of China making claims about itself"
+        "reason": "LLM detected self-interest: Source is the state-owned broadcaster of China"
       },
       "completeness": {
         "status": "complete",
@@ -7374,7 +7359,7 @@
     "final_url": "https://blog.richardvanhooijdonk.com/en/the-truth-about-chinas-futuristic-ghost-cities/",
     "domain": "richardvanhooijdonk.com",
     "use_permission": "B: Usable with safeguards",
-    "permission_reason": "Evidence too weak for factual support - use as context only [LLM upgraded: The text excerpt provides context and analysis from a third-party source, with some verifiable claims (e.g. population figures for Kangbashi District). While the source may not be authoritative, the information could be usable with appropriate safeguards.]",
+    "permission_reason": "Secondary reporting - must corroborate for key claims",
     "core_checks": {
       "intended_use": "B",
       "relationship": {
@@ -7387,8 +7372,8 @@
         "reason": "Full content retrieved (5055 chars) despite access warnings"
       },
       "evidence_strength": {
-        "level": "weak",
-        "reason": "Assertions without clear evidence trail",
+        "level": "medium",
+        "reason": "Assertions without clear evidence trail [LLM: Some direct quotes and verifiable claims, but lacks primary evidence]",
         "quotes": []
       },
       "specificity": {
@@ -7446,7 +7431,7 @@
       "llm_used": true,
       "llm_error": "",
       "llm_decisions": [
-        "final_review_upgrade"
+        "evidence_strength"
       ]
     }
   },
@@ -7492,7 +7477,7 @@
       "severity_support": {
         "claim_detected": true,
         "status": "partial",
-        "reason": "Partial severity support. Missing: extent (severity of harm) [LLM: The text provides some information about the phenomenon of 'ghost cities' in China, but does not directly address claims of systematic or widespread human rights violations. The text mentions the existence of underoccupied property developments, but does not provide evidence of the scale, severity, or systematic nature of any human rights issues.]",
+        "reason": "Partial severity support. Missing: extent (severity of harm)",
         "missing": [
           "extent (severity of harm)"
         ]
