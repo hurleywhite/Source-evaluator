@@ -516,15 +516,28 @@ URL: {url}
 TEXT EXCERPT:
 {truncated}
 
-IMPORTANT DISTINCTIONS:
-- Self-interest means the source is making claims ABOUT ITSELF or its own organization
-- An NGO (Freedom House, Amnesty, HRW) reporting on a GOVERNMENT is NOT self-interest — they are third-party reporters
-- A tech company (Google, Microsoft) reporting on EXTERNAL threat actors is NOT self-interest
-- A government source making claims about its own policies IS self-interest
-- An "about us" page describing the organization IS self-interest
-- Research organizations publishing analysis of external actors are NOT self-interest
+CRITICAL: You must identify the SOURCE (who published this), not the SUBJECT (what it's about).
 
-Is this source primarily making claims about ITSELF (its own organization, its own accomplishments, its own mission)?
+MARK AS SELF-INTEREST (is_self_interest: true) ONLY IF:
+- The SOURCE ORGANIZATION is making claims ABOUT ITSELF
+- This is an "about us" page describing the SOURCE's mission
+- The SOURCE is promoting its OWN legitimacy or accomplishments
+- This is a press release about the SOURCE's own activities
+
+NOT SELF-INTEREST (is_self_interest: false) IF:
+- News media (Mother Jones, Wired, BBC, etc.) reporting on ANY topic - even controversial organizations
+- Think tank analyzing EXTERNAL actors - even if those actors are advocacy groups
+- NGO documenting abuses BY governments
+- Academic research on any external subject
+- Tech company reporting on external threat actors
+
+KEY DISTINCTION - SOURCE vs SUBJECT:
+- Mother Jones article ABOUT Guo Wengui's organization = NOT self-interest (Mother Jones is the SOURCE, Guo is the SUBJECT)
+- BBC article ABOUT an advocacy group = NOT self-interest (BBC is reporting, not advocating)
+- CTA website promoting CTA's legitimacy = SELF-INTEREST (CTA is both SOURCE and SUBJECT)
+- Freedom House report on China = NOT self-interest (Freedom House reporting on external actor)
+
+QUESTION: Is the PUBLISHING ORGANIZATION (the SOURCE) making claims about ITSELF?
 
 Respond ONLY with JSON:
 {{"is_self_interest": true|false, "reason": "brief 10-word explanation"}}"""
@@ -617,6 +630,68 @@ Respond ONLY with JSON:
             result.get("reason", "LLM assessment"),
             result.get("still_missing", [])
         )
+    return None
+
+
+def llm_assess_source_type(
+    client: Any,
+    url: str,
+    domain: str,
+    text: str,
+    model: str = DEFAULT_LLM_MODEL
+) -> Optional[Dict[str, Any]]:
+    """
+    Comprehensive source type assessment for nuanced evidentiary handling.
+    Returns dict with source_type, evidence_level, and reasoning.
+    """
+    truncated = text[:LLM_MAX_TEXT_CHARS] if len(text) > LLM_MAX_TEXT_CHARS else text
+    prompt = f"""Analyze this source to determine its type and appropriate evidentiary use.
+
+URL: {url}
+DOMAIN: {domain}
+
+TEXT EXCERPT:
+{truncated}
+
+Classify the SOURCE TYPE (pick ONE):
+1. "international_ngo" - Established international NGO/watchdog (Amnesty, HRW, Freedom House, CPJ, CIVICUS, etc.) reporting on EXTERNAL issues
+2. "advocacy_org" - Organization advocating for its OWN cause (ONLY if the specific content is self-promotional)
+3. "established_news" - Major news media with editorial standards (BBC, Reuters, AP, NYT, Guardian, Economist, Wired, Mother Jones, Coda Story, etc.)
+4. "state_media" - CONFIRMED government-owned media (Xinhua, CGTN, China Daily, RT, Sputnik, PressTV, Global Times)
+5. "government_self" - Official government website (.gov domain) discussing its OWN policies
+6. "government_other" - Official government source discussing ANOTHER government
+7. "think_tank_independent" - Independent research institute (ISDP, Brookings, RAND, China Media Project at HKU, etc.)
+8. "think_tank_state" - CONFIRMED state-funded think tank
+9. "academic" - Academic journal, university research, scholarly publication
+10. "other" - Tech company blogs (Google, Microsoft), independent monitors, other credible sources
+
+CRITICAL DISTINCTIONS - DO NOT MISCLASSIFY:
+- Google, Microsoft, tech company security blogs = "other" (NOT government)
+- China Media Project (HKU) = "think_tank_independent" (NOT state media - it MONITORS Chinese media)
+- Supreme People's Court Monitor = "other" (independent monitor, NOT government)
+- Mother Jones, Coda Story, The Diplomat = "established_news" (NOT advocacy)
+- Independent researchers/monitors tracking government behavior = "other" or "think_tank_independent"
+
+For EVIDENCE LEVEL, recommend:
+- "strong" - Suitable for factual claims (international NGOs, independent think tanks, academic sources)
+- "medium" - Usable with corroboration (established news, some government sources)
+- "narrative_only" - Cite as "X claims..." (state media, government-on-self, advocacy orgs on own cause)
+- "context_only" - Background/analysis only
+
+KEY PRINCIPLES:
+- NGOs reporting on EXTERNAL actors = strong evidence (they're third-party watchdogs)
+- Advocacy orgs on their OWN cause = narrative only (self-interest)
+- Government on ITSELF = narrative only (self-interest)
+- Government on OTHER government = consider bilateral relations and potential bias
+- State-affiliated think tanks = treat like state media (narrative only)
+- News media: check if they have known bias for/against the country being covered
+
+Respond ONLY with JSON:
+{{"source_type": "type_from_list", "evidence_level": "strong|medium|narrative_only|context_only", "bias_concern": true|false, "reason": "brief explanation"}}"""
+
+    result = llm_review(client, prompt, model)
+    if result and "source_type" in result:
+        return result
     return None
 
 
@@ -1402,7 +1477,37 @@ def evaluate_source(
 
     # LLM Augmentation: review borderline cases
     if llm_client and main.text:
-        # Review evidence strength if weak or medium
+        # Comprehensive source type assessment for nuanced handling
+        # Only run for sources not already classified by heuristics
+        if core.relationship == RelationshipType.THIRD_PARTY:
+            source_type_result = llm_assess_source_type(
+                llm_client, main.final_url or url, main.domain, main.text, llm_model
+            )
+            if source_type_result:
+                result.llm_used = True
+                result.llm_decisions.append("source_type_assessment")
+
+                src_type = source_type_result.get("source_type", "other")
+                ev_level = source_type_result.get("evidence_level", "medium")
+                src_reason = source_type_result.get("reason", "")
+
+                # CONSERVATIVE application: Only override for VERY clear-cut cases
+                # State media that heuristics missed (not on our list but LLM identified)
+                if src_type == "state_media":
+                    core.relationship = RelationshipType.OFFICIAL_STATE
+                    core.a_only_restriction = True
+                    core.relationship_reason = f"LLM identified state media: {src_reason}"
+
+                # International NGO upgrade: Only boost evidence if LLM says strong
+                elif src_type == "international_ngo" and ev_level == "strong":
+                    if core.evidence_strength == EvidenceStrength.MEDIUM:
+                        core.evidence_strength = EvidenceStrength.STRONG
+                        core.evidence_reason = f"{core.evidence_reason} [LLM: established international NGO/watchdog]"
+
+                # NOTE: We do NOT automatically downgrade based on "advocacy_org" or "government_self"
+                # These are often misclassified. Let the self-interest check below handle nuanced cases.
+
+        # Review evidence strength if weak or medium (and not already upgraded)
         if core.evidence_strength in (EvidenceStrength.WEAK, EvidenceStrength.MEDIUM):
             llm_ev = llm_assess_evidence_strength(
                 llm_client, main.text, core.evidence_strength.value, llm_model
