@@ -858,38 +858,29 @@ def assess_relationship(url: str, domain: str, text: str) -> Tuple[RelationshipT
     """
     Check 2: Relationship / self-interest restriction.
     Returns (relationship_type, a_only_restriction, reason)
+
+    Key principle: Self-interest is about whether the source is making claims
+    ABOUT ITSELF, not about whether it's an organization. A human rights org
+    reporting on a government is third-party, not self-interest.
     """
     url_low = url.lower()
     domain_low = domain.lower()
 
-    # Known third-party research/advocacy organizations - these report on EXTERNAL actors
-    # They are NOT self-interest when reporting on governments, corporations, or other entities
-    known_third_party_reporters = [
-        "freedomhouse.org", "hrw.org", "amnesty.org", "refworld.org",
-        "cpj.org", "pen.org", "icnl.org", "ohchr.org",
-        "blog.google",  # Google TAG reports on external threat actors
-        "citizenlab.ca", "eff.org", "accessnow.org",
-    ]
-    if any(org in domain_low for org in known_third_party_reporters):
-        # Only mark as self-interest if it's actually an about page
-        if "/about" in url_low or "who-we-are" in url_low:
-            return RelationshipType.SELF_INTEREST, True, "Source is the organization's own about/self-description page"
-        return RelationshipType.THIRD_PARTY, False, "Third-party research/advocacy organization reporting on external actors"
-
-    # Self-interest: about pages, org speaking about itself
-    if "/about" in url_low or "who-we-are" in url_low:
+    # Self-interest: ONLY about/self-description pages
+    # These are pages where an org describes itself, its mission, its accomplishments
+    if "/about" in url_low or "who-we-are" in url_low or "/about-us" in url_low:
         return RelationshipType.SELF_INTEREST, True, "Source is the organization's own about/self-description page"
 
-    # Official/state sources
-    gov_indicators = [".gov", ".mil", ".gouv", "government", "ministry", "bureau"]
-    if any(ind in domain_low or ind in url_low for ind in gov_indicators):
+    # Official/state sources - government domains
+    if ".gov" in domain_low or ".mil" in domain_low or ".gouv" in domain_low:
         return RelationshipType.OFFICIAL_STATE, True, "Official government/state source - treat claims as narrative unless corroborated"
 
-    # State media
-    state_media = ["xinhua", "globaltimes", "rt.com", "sputnik", "presstv", "cgtn"]
+    # State media - known state-controlled outlets
+    state_media = ["xinhua", "globaltimes", "rt.com", "sputnik", "presstv", "cgtn", "chinadaily"]
     if any(sm in domain_low for sm in state_media):
         return RelationshipType.OFFICIAL_STATE, True, "State-affiliated media - treat claims as narrative"
 
+    # Default: third-party (let LLM review if needed for edge cases)
     return RelationshipType.THIRD_PARTY, False, "Third-party source - potentially eligible for B use"
 
 
