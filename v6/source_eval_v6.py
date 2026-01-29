@@ -122,6 +122,15 @@ KNOWN_SATIRE_ACCOUNTS = [
     "/clickhole/", "/clickhole", "/@clickhole",
 ]
 
+# Domains not suitable for evidentiary use (user-generated content, forums, spam)
+UNRELIABLE_SOURCE_DOMAINS = {
+    "reddit.com",      # User-generated forum content
+    "4chan.org",       # Anonymous forum
+    "8kun.top",        # Anonymous forum
+    "quora.com",       # User-generated Q&A
+    "answers.yahoo.com",  # User-generated Q&A
+}
+
 # Paywall/bot detection
 PAYWALL_HINTS = [
     "subscribe to continue", "subscribe now", "sign in to continue",
@@ -1253,6 +1262,10 @@ def check_auto_reject(doc: FetchedDoc) -> Tuple[bool, str, bool]:
     for pattern in KNOWN_SATIRE_ACCOUNTS:
         if pattern in url_lower:
             return True, f"Known satire account on {domain}: {pattern.strip('/')}", False
+
+    # Unreliable source domains (user-generated content, forums, etc.)
+    if domain in UNRELIABLE_SOURCE_DOMAINS:
+        return True, f"Unreliable source type: {domain} (user-generated/forum content)", False
 
     # Satire signals in metadata - FLAG for LLM review, don't auto-reject
     # This catches articles ABOUT satire which are NOT satire themselves
