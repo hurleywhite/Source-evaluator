@@ -528,38 +528,42 @@ def llm_assess_satire(
 ) -> Optional[Tuple[bool, str]]:
     """LLM review for satire/parody. Returns (is_satire, reason) or None."""
     truncated = text[:2000] if len(text) > 2000 else text
-    prompt = f"""You are evaluating whether a source should be REJECTED as satire/parody.
+    prompt = f"""You must determine if THIS SOURCE should be rejected as satire.
 
-DOMAIN: {domain}
-TITLE: {title}
+SOURCE DOMAIN: {domain}
+ARTICLE TITLE: {title}
 
 TEXT EXCERPT:
 {truncated}
 
-QUESTION: Is the SOURCE ITSELF producing satirical/parodic/fake-news content?
+CRITICAL: Distinguish between SOURCE and SUBJECT.
+- SOURCE = the website/publication hosting this content (the DOMAIN above)
+- SUBJECT = what the article is ABOUT (could be The Onion, memes, humor, etc.)
 
-ANSWER "is_satire": true ONLY IF:
-- The source is a satire publication (The Onion, Babylon Bee, Clickhole, etc.)
-- The content is intentionally fabricated humor presented as fake news
-- The source is creating parody content
+QUESTION: Is the SOURCE DOMAIN ({domain}) a satire publication?
+
+ANSWER "is_satire": true ONLY IF the DOMAIN itself is a satire site:
+- theonion.com, babylonbee.com, clickhole.com = satire sites
+- If domain is cnn.com, bbc.com, npr.org, substack.com, facebook.com = NOT satire sites
 
 ANSWER "is_satire": false IF:
-- The article is JOURNALISM ABOUT satire (e.g., BBC reporting on an Onion article)
-- The article DISCUSSES memes, humor, or satire as a topic (e.g., "how protesters use memes")
-- The article ANALYZES satirical content or publications
-- The article MENTIONS satire/humor in passing but is itself serious journalism
-- The source is a news organization, think tank, NGO, or research institution
-- The content is academic analysis of satire/humor
-- Facebook/YouTube pages EMBEDDING satirical content from elsewhere
+- The DOMAIN is a legitimate news/media organization (CNN, BBC, NPR, Guardian, etc.)
+- The DOMAIN is a blogging platform (Substack, Medium, WordPress)
+- The DOMAIN is social media (Facebook, Twitter, YouTube, Reddit)
+- The article is ABOUT satire but the SOURCE is not a satire publication
+- The content ANALYZES, DISCUSSES, or QUOTES satirical content
 
-KEY EXAMPLES:
-- BBC article titled "Onion names Kim Jong-un sexiest man" → is_satire: FALSE (journalism about satire)
-- Article titled "Memes and satire on Hong Kong frontlines" → is_satire: FALSE (journalism about memes)
-- The Onion article "Kim Jong-un Sexiest Man Alive" → is_satire: TRUE (source producing satire)
-- Substack analyzing what The Onion got right → is_satire: FALSE (analysis of satire)
+CONCRETE EXAMPLES:
+- cnn.com article about The Onion → is_satire: FALSE (CNN is the source, not The Onion)
+- bbc.com covering an Onion story → is_satire: FALSE (BBC is news, not satire)
+- substack.com analyzing The Onion → is_satire: FALSE (Substack is a platform, not satire)
+- facebook.com/TheOnion video → is_satire: FALSE (Facebook is the platform hosting it)
+- theonion.com/any-article → is_satire: TRUE (The Onion domain IS satire)
+
+The domain "{domain}" - is this domain itself a satire publication?
 
 Respond ONLY with JSON:
-{{"is_satire": true|false, "reason": "brief 10-word explanation"}}"""
+{{"is_satire": true|false, "reason": "brief explanation focusing on the DOMAIN"}}"""
 
     result = llm_review(client, prompt, model)
     if result and "is_satire" in result:

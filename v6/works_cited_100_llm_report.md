@@ -1,5 +1,5 @@
 # HRF Source Evaluation Report
-_Generated: 2026-01-29 11:13_
+_Generated: 2026-01-29 11:46_
 _Evaluator: v6 (HRF Practical v1)_
 
 ## https://news.mingpao.com/pns/%E4%B8%AD%E5%9C%8B/section/20260128/s00013
@@ -127,8 +127,8 @@ _Evaluator: v6 (HRF Practical v1)_
    - Reason: Source is the organization's own about/self-description page
 3. **Completeness:** complete
    - Full content retrieved (2692 chars)
-4. **Evidence Strength:** weak
-   - Assertions without clear evidence trail
+4. **Evidence Strength:** medium
+   - Assertions without clear evidence trail [LLM: contains some verifiable claims but lacks primary evidence and direct sourcing]
 5. **Specificity:** Yes
    - Contains traceable anchors: dates/times (4 found); locations (6 found); named actors (12 found)
 6. **Corroboration:** not_assessed
@@ -141,6 +141,10 @@ _Evaluator: v6 (HRF Practical v1)_
    - Ownership/governance information found on publisher pages
 9. **Corrections Behavior:** not_assessed
 10. **Standards Transparency:** not_assessed
+
+### LLM Augmentation
+- LLM used: Yes
+- Decisions augmented: evidence_strength
 
 ### Evidence Pages Fetched
 - https://east-turkistan.net/about-the-etge/
@@ -225,6 +229,10 @@ _Evaluator: v6 (HRF Practical v1)_
 ### Warnings
 - Bot-block/anti-automation detected
 
+### LLM Augmentation
+- LLM used: Yes
+- Decisions augmented: severity_support
+
 ### Evidence Pages Fetched
 - https://apnews.com/article/xi-jinping-china-president-vote-5e6230d8c881dc17b11a781e832accd1
 - https://apnews.com/hub/privacy
@@ -265,6 +273,10 @@ _Evaluator: v6 (HRF Practical v1)_
 
 ### Warnings
 - Bot-block/anti-automation detected
+
+### LLM Augmentation
+- LLM used: Yes
+- Decisions augmented: severity_support
 
 ### Evidence Pages Fetched
 - https://chinamediaproject.org/2013/08/27/china-defines-seven-base-lines-for-a-nicer-internet/
@@ -313,8 +325,8 @@ _Evaluator: v6 (HRF Practical v1)_
 ## https://www.wired.com/story/uyghur-internet-erased-china/
 
 **Domain:** wired.com
-**Use Permission:** C: Context-only
-**Reason:** Evidence too weak for factual support - use as context only
+**Use Permission:** B: Usable with safeguards
+**Reason:** Secondary reporting - must corroborate for key claims
 
 ### Core Checks
 
@@ -324,15 +336,15 @@ _Evaluator: v6 (HRF Practical v1)_
    - Reason: Third-party source - potentially eligible for B use
 3. **Completeness:** complete
    - Full content retrieved (3288 chars) despite access warnings
-4. **Evidence Strength:** weak
-   - Assertions without clear evidence trail
+4. **Evidence Strength:** medium
+   - Assertions without clear evidence trail [LLM: some direct quotes, specific details, but no primary evidence]
 5. **Specificity:** Yes
    - Contains traceable anchors: dates/times (3 found); locations (3 found); named actors (5 found)
 6. **Corroboration:** not_assessed
    - Cross-source corroboration check not implemented in this run
 7. **Severity Support:** partial
-   - Partial severity support. Missing: systematicity (pattern/frequency)
-   - Missing: systematicity (pattern/frequency)
+   - Partial severity support. Missing: systematicity (pattern/frequency) [LLM: The text provides some evidence of systematic human rights violations against the Uyghur community in Xinjiang, particularly targeting the Uyghur IT sector. However, the information is focused on a specific industry and does not provide a comprehensive assessment of the scale and scope of the alleged violations.]
+   - Missing: systematic evidence of the scale and severity of harm across Xinjiang, more details on the involvement of state apparatus in the alleged violations
 
 ### Publisher Signals (Optional)
 
@@ -342,6 +354,10 @@ _Evaluator: v6 (HRF Practical v1)_
 
 ### Warnings
 - Bot-block/anti-automation detected
+
+### LLM Augmentation
+- LLM used: Yes
+- Decisions augmented: evidence_strength, severity_support
 
 ### Evidence Pages Fetched
 - https://www.wired.com/story/uyghur-internet-erased-china/
@@ -371,7 +387,7 @@ _Evaluator: v6 (HRF Practical v1)_
 6. **Corroboration:** not_assessed
    - Cross-source corroboration check not implemented in this run
 7. **Severity Support:** partial
-   - Partial severity support. Missing: extent (severity of harm)
+   - Partial severity support. Missing: extent (severity of harm) [LLM: The text provides some evidence of potential wealth accumulation by the family of a high-ranking government official, but does not provide clear evidence of systematic or widespread human rights violations.]
    - Missing: extent (severity of harm)
 
 ### Publisher Signals (Optional)
@@ -384,6 +400,10 @@ _Evaluator: v6 (HRF Practical v1)_
 
 ### Warnings
 - Bot-block/anti-automation detected
+
+### LLM Augmentation
+- LLM used: Yes
+- Decisions augmented: severity_support
 
 ### Evidence Pages Fetched
 - https://www.theguardian.com/world/2012/oct/26/new-york-times-china-wen-jiabao
@@ -527,7 +547,7 @@ _Evaluator: v6 (HRF Practical v1)_
 6. **Corroboration:** not_assessed
    - Cross-source corroboration check not implemented in this run
 7. **Severity Support:** partial
-   - Claim appears systematic but evidence incomplete. Missing: extent (severity of harm), systematicity (pattern/frequency)
+   - Claim appears systematic but evidence incomplete. Missing: extent (severity of harm), systematicity (pattern/frequency) [LLM: The text provides evidence of targeted harassment and threats against specific individuals, but does not clearly indicate the scale, pattern, or institutionalization of these abuses.]
    - Missing: extent (severity of harm), systematicity (pattern/frequency)
 
 ### Publisher Signals (Optional)
@@ -536,6 +556,10 @@ _Evaluator: v6 (HRF Practical v1)_
 9. **Corrections Behavior:** found
    - Corrections/accountability policy or practice found
 10. **Standards Transparency:** not_assessed
+
+### LLM Augmentation
+- LLM used: Yes
+- Decisions augmented: severity_support
 
 ### Evidence Pages Fetched
 - https://www.voanews.com/a/assailants-used-identities-of-chinese-critics-to-call-in-bomb-threats/7027734.html
@@ -682,14 +706,18 @@ _Evaluator: v6 (HRF Practical v1)_
 6. **Corroboration:** not_assessed
    - Cross-source corroboration check not implemented in this run
 7. **Severity Support:** partial
-   - Partial severity support. Missing: systematicity (pattern/frequency)
-   - Missing: systematicity (pattern/frequency)
+   - Partial severity support. Missing: systematicity (pattern/frequency) [LLM: The text provides evidence of specific human rights violations against Xu Zhiyong and Ding Jiaxi, including lengthy prison sentences, torture, and arbitrary detention. However, it does not clearly demonstrate the systematic/widespread nature of these violations across China.]
+   - Missing: systematicity, extent
 
 ### Publisher Signals (Optional)
 
 8. **Ownership Transparency:** not_assessed
 9. **Corrections Behavior:** not_assessed
 10. **Standards Transparency:** not_assessed
+
+### LLM Augmentation
+- LLM used: Yes
+- Decisions augmented: severity_support
 
 ### Evidence Pages Fetched
 - https://www.amnesty.org/en/latest/news/2023/04/china-heavy-prison-sentences-for-human-rights-activists-disgraceful/
@@ -710,8 +738,8 @@ _Evaluator: v6 (HRF Practical v1)_
    - Reason: Third-party source - potentially eligible for B use
 3. **Completeness:** partial
    - Bot-block detected with limited content (1450 chars)
-4. **Evidence Strength:** weak
-   - Assertions without clear evidence trail
+4. **Evidence Strength:** medium
+   - Assertions without clear evidence trail [LLM: Contains some specific details but lacks primary sources or attribution]
 5. **Specificity:** No
    - Limited anchors: dates/times (2 found)
 6. **Corroboration:** not_assessed
@@ -726,6 +754,10 @@ _Evaluator: v6 (HRF Practical v1)_
 
 ### Warnings
 - Bot-block/anti-automation detected
+
+### LLM Augmentation
+- LLM used: Yes
+- Decisions augmented: evidence_strength
 
 ### Evidence Pages Fetched
 - https://www.business-humanrights.org/en/latest-news/china-human-rights-lawyers-concern-group-report-on-the-709-crackdown/
@@ -990,6 +1022,10 @@ _Evaluator: v6 (HRF Practical v1)_
    - Ownership/governance information found on publisher pages
 9. **Corrections Behavior:** not_assessed
 10. **Standards Transparency:** not_assessed
+
+### LLM Augmentation
+- LLM used: Yes
+- Decisions augmented: severity_support
 
 ### Evidence Pages Fetched
 - https://www.isdp.eu//publication/chinas-presidential-election-role-npc/
@@ -1460,15 +1496,15 @@ _Evaluator: v6 (HRF Practical v1)_
 ## https://east-turkistan.net/east-turkistan-government-in-exile-empowers-democracy-with-landmark-parliamentary-candidate-elections-in-europe/
 
 **Domain:** east-turkistan.net
-**Use Permission:** C: Context-only
-**Reason:** Evidence too weak for factual support - use as context only
+**Use Permission:** A: Narrative-only
+**Reason:** Self-interest/official source: LLM detected self-interest: Source is the East Turkistan government-in-exile describing its own elections
 
 ### Core Checks
 
 1. **Intended Use:** B
-2. **Relationship:** third_party
-   - A-only restriction: False
-   - Reason: Third-party source - potentially eligible for B use
+2. **Relationship:** self_interest
+   - A-only restriction: True
+   - Reason: LLM detected self-interest: Source is the East Turkistan government-in-exile describing its own elections
 3. **Completeness:** complete
    - Full content retrieved (8042 chars)
 4. **Evidence Strength:** weak
@@ -1478,7 +1514,7 @@ _Evaluator: v6 (HRF Practical v1)_
 6. **Corroboration:** not_assessed
    - Cross-source corroboration check not implemented in this run
 7. **Severity Support:** partial
-   - Partial severity support. Missing: extent (severity of harm)
+   - Partial severity support. Missing: extent (severity of harm) [LLM: The provided text discusses the election of parliamentary candidates in the East Turkistan Government-in-Exile, but does not directly address claims of systematic or widespread human rights violations. The text lacks information on the extent (severity) of any alleged human rights abuses.]
    - Missing: extent (severity of harm)
 
 ### Publisher Signals (Optional)
@@ -1487,6 +1523,10 @@ _Evaluator: v6 (HRF Practical v1)_
    - Ownership/governance information found on publisher pages
 9. **Corrections Behavior:** not_assessed
 10. **Standards Transparency:** not_assessed
+
+### LLM Augmentation
+- LLM used: Yes
+- Decisions augmented: self_interest, severity_support
 
 ### Evidence Pages Fetched
 - https://east-turkistan.net/east-turkistan-government-in-exile-empowers-democracy-with-landmark-parliamentary-candidate-elections-in-europe/
@@ -1577,15 +1617,15 @@ _Evaluator: v6 (HRF Practical v1)_
 ## https://www.cbc.ca/news/editorsblog/brodie-fenlon-blog-china-1.6636644
 
 **Domain:** cbc.ca
-**Use Permission:** C: Context-only
-**Reason:** Evidence too weak for factual support - use as context only
+**Use Permission:** A: Narrative-only
+**Reason:** Self-interest/official source: LLM detected self-interest: The source is describing its own journalism practices and coverage.
 
 ### Core Checks
 
 1. **Intended Use:** B
-2. **Relationship:** third_party
-   - A-only restriction: False
-   - Reason: Third-party source - potentially eligible for B use
+2. **Relationship:** self_interest
+   - A-only restriction: True
+   - Reason: LLM detected self-interest: The source is describing its own journalism practices and coverage.
 3. **Completeness:** complete
    - Full content retrieved (6502 chars) despite access warnings
 4. **Evidence Strength:** weak
@@ -1604,6 +1644,10 @@ _Evaluator: v6 (HRF Practical v1)_
 
 ### Warnings
 - Bot-block/anti-automation detected
+
+### LLM Augmentation
+- LLM used: Yes
+- Decisions augmented: self_interest
 
 ### Evidence Pages Fetched
 - https://www.cbc.ca/news/editorsblog/brodie-fenlon-blog-china-1.6636644
@@ -1633,14 +1677,18 @@ _Evaluator: v6 (HRF Practical v1)_
 6. **Corroboration:** not_assessed
    - Cross-source corroboration check not implemented in this run
 7. **Severity Support:** partial
-   - Partial severity support. Missing: extent (severity of harm)
-   - Missing: extent (severity of harm)
+   - Partial severity support. Missing: extent (severity of harm) [LLM: The text provides some background on the 'Four Types of Cases' in the Chinese judicial system, but does not directly address the scale, severity, or systematicity of human rights violations.]
+   - Missing: extent (severity of harm), systematicity (pattern/frequency of violations), institutionalization (state apparatus involvement)
 
 ### Publisher Signals (Optional)
 
 8. **Ownership Transparency:** not_assessed
 9. **Corrections Behavior:** not_assessed
 10. **Standards Transparency:** not_assessed
+
+### LLM Augmentation
+- LLM used: Yes
+- Decisions augmented: severity_support
 
 ### Evidence Pages Fetched
 - https://supremepeoplescourtmonitor.com/tag/judicial-responsibility/
@@ -1768,8 +1816,8 @@ _Evaluator: v6 (HRF Practical v1)_
 ## https://blog.google/threat-analysis-group/tag-bulletin-q4-2022/
 
 **Domain:** blog.google
-**Use Permission:** C: Context-only
-**Reason:** Evidence too weak for factual support - use as context only
+**Use Permission:** B: Usable with safeguards
+**Reason:** Secondary reporting - must corroborate for key claims
 
 ### Core Checks
 
@@ -1779,8 +1827,8 @@ _Evaluator: v6 (HRF Practical v1)_
    - Reason: Third-party source - potentially eligible for B use
 3. **Completeness:** complete
    - Full content retrieved (7603 chars) despite access warnings
-4. **Evidence Strength:** weak
-   - Assertions without clear evidence trail
+4. **Evidence Strength:** medium
+   - Assertions without clear evidence trail [LLM: Contains some specific details but lacks primary evidence and clear attribution]
 5. **Specificity:** Yes
    - Contains traceable anchors: dates/times (4 found); locations (5 found); named actors (7 found)
 6. **Corroboration:** not_assessed
@@ -1796,6 +1844,10 @@ _Evaluator: v6 (HRF Practical v1)_
 
 ### Warnings
 - Bot-block/anti-automation detected
+
+### LLM Augmentation
+- LLM used: Yes
+- Decisions augmented: evidence_strength
 
 ### Evidence Pages Fetched
 - https://blog.google/threat-analysis-group/tag-bulletin-q4-2022/
@@ -1846,15 +1898,15 @@ _Evaluator: v6 (HRF Practical v1)_
 ## http://tibetoffice.org/media-press/commentaries-opinions/the-legitimacy-and-role-of-the-central-tibetan-administration
 
 **Domain:** tibetoffice.org
-**Use Permission:** B: Usable with safeguards
-**Reason:** Secondary reporting - must corroborate for key claims
+**Use Permission:** A: Narrative-only
+**Reason:** Self-interest/official source: LLM detected self-interest: Envoy of the Dalai Lama discussing the Central Tibetan Administration
 
 ### Core Checks
 
 1. **Intended Use:** B
-2. **Relationship:** third_party
-   - A-only restriction: False
-   - Reason: Third-party source - potentially eligible for B use
+2. **Relationship:** self_interest
+   - A-only restriction: True
+   - Reason: LLM detected self-interest: Envoy of the Dalai Lama discussing the Central Tibetan Administration
 3. **Completeness:** complete
    - Full content retrieved (9776 chars)
 4. **Evidence Strength:** medium
@@ -1870,6 +1922,10 @@ _Evaluator: v6 (HRF Practical v1)_
 8. **Ownership Transparency:** not_assessed
 9. **Corrections Behavior:** not_assessed
 10. **Standards Transparency:** not_assessed
+
+### LLM Augmentation
+- LLM used: Yes
+- Decisions augmented: self_interest
 
 ### Evidence Pages Fetched
 - http://tibetoffice.org/media-press/commentaries-opinions/the-legitimacy-and-role-of-the-central-tibetan-administration
@@ -1891,8 +1947,8 @@ _Evaluator: v6 (HRF Practical v1)_
    - Reason: Third-party source - potentially eligible for B use
 3. **Completeness:** partial
    - Bot-block detected with limited content (1170 chars)
-4. **Evidence Strength:** weak
-   - Assertions without clear evidence trail
+4. **Evidence Strength:** medium
+   - Assertions without clear evidence trail [LLM: Uses interviews but lacks primary evidence, specific details]
 5. **Specificity:** No
    - Limited anchors: dates/times (2 found)
 6. **Corroboration:** not_assessed
@@ -1907,6 +1963,10 @@ _Evaluator: v6 (HRF Practical v1)_
 
 ### Warnings
 - Bot-block/anti-automation detected
+
+### LLM Augmentation
+- LLM used: Yes
+- Decisions augmented: evidence_strength
 
 ### Evidence Pages Fetched
 - https://papers.ssrn.com/sol3/papers.cfm?abstract_id=3761675
@@ -2219,15 +2279,15 @@ _Evaluator: v6 (HRF Practical v1)_
 ## https://www.bbc.com/news/world-asia-china-57780023
 
 **Domain:** bbc.com
-**Use Permission:** B: Preferred evidence
-**Reason:** Strong primary anchors, complete access, traceable
+**Use Permission:** A: Narrative-only
+**Reason:** Self-interest/official source: LLM detected self-interest: Vloggers are being accused of promoting Chinese government narratives
 
 ### Core Checks
 
 1. **Intended Use:** B
-2. **Relationship:** third_party
-   - A-only restriction: False
-   - Reason: Third-party source - potentially eligible for B use
+2. **Relationship:** self_interest
+   - A-only restriction: True
+   - Reason: LLM detected self-interest: Vloggers are being accused of promoting Chinese government narratives
 3. **Completeness:** complete
    - Full content retrieved (12627 chars)
 4. **Evidence Strength:** strong
@@ -2247,6 +2307,10 @@ _Evaluator: v6 (HRF Practical v1)_
 9. **Corrections Behavior:** not_assessed
 10. **Standards Transparency:** not_assessed
 
+### LLM Augmentation
+- LLM used: Yes
+- Decisions augmented: self_interest
+
 ### Evidence Pages Fetched
 - https://www.bbc.com/news/world-asia-china-57780023
 - https://www.bbc.com/contact
@@ -2256,15 +2320,15 @@ _Evaluator: v6 (HRF Practical v1)_
 ## https://www.reddit.com/r/China/comments/mittq2/the_case_of_cgtns_fake_french_journalist_keeps/
 
 **Domain:** reddit.com
-**Use Permission:** C: Context-only
-**Reason:** Evidence too weak for factual support - use as context only
+**Use Permission:** A: Narrative-only
+**Reason:** Self-interest/official source: LLM detected self-interest: The source is reporting on CGTN, its own propaganda outlet
 
 ### Core Checks
 
 1. **Intended Use:** B
-2. **Relationship:** third_party
-   - A-only restriction: False
-   - Reason: Third-party source - potentially eligible for B use
+2. **Relationship:** self_interest
+   - A-only restriction: True
+   - Reason: LLM detected self-interest: The source is reporting on CGTN, its own propaganda outlet
 3. **Completeness:** complete
    - Full content retrieved (2868 chars) despite access warnings
 4. **Evidence Strength:** weak
@@ -2284,6 +2348,10 @@ _Evaluator: v6 (HRF Practical v1)_
 ### Warnings
 - Bot-block/anti-automation detected
 
+### LLM Augmentation
+- LLM used: Yes
+- Decisions augmented: self_interest
+
 ### Evidence Pages Fetched
 - https://www.reddit.com/r/China/comments/mittq2/the_case_of_cgtns_fake_french_journalist_keeps/
 - https://redditinc.com/
@@ -2300,9 +2368,9 @@ _Evaluator: v6 (HRF Practical v1)_
 ### Core Checks
 
 1. **Intended Use:** B
-2. **Relationship:** third_party
-   - A-only restriction: False
-   - Reason: Third-party source - potentially eligible for B use
+2. **Relationship:** self_interest
+   - A-only restriction: True
+   - Reason: LLM detected self-interest: The article extensively discusses the Global Times itself and its operations.
 3. **Completeness:** complete
    - Full content retrieved (28237 chars) despite access warnings
 4. **Evidence Strength:** strong
@@ -2314,8 +2382,8 @@ _Evaluator: v6 (HRF Practical v1)_
 6. **Corroboration:** not_assessed
    - Cross-source corroboration check not implemented in this run
 7. **Severity Support:** partial
-   - Partial severity support. Missing: extent (severity of harm)
-   - Missing: extent (severity of harm)
+   - Partial severity support. Missing: extent (severity of harm) [LLM: The text provides some information about the Global Times newspaper, its history, ownership, and editorial stance, but does not directly address claims of systematic or widespread human rights violations. The text mentions that the newspaper has a pro-CCP and nationalistic slant, but does not provide evidence of the extent, systematicity, or institutionalization of potential human rights abuses.]
+   - Missing: extent (severity of harm), systematicity (pattern/frequency), institutionalization (state apparatus involvement)
 
 ### Publisher Signals (Optional)
 
@@ -2325,6 +2393,10 @@ _Evaluator: v6 (HRF Practical v1)_
 
 ### Warnings
 - Bot-block/anti-automation detected
+
+### LLM Augmentation
+- LLM used: Yes
+- Decisions augmented: self_interest, severity_support
 
 ### Evidence Pages Fetched
 - https://en.wikipedia.org/wiki/Global_Times
@@ -2354,14 +2426,18 @@ _Evaluator: v6 (HRF Practical v1)_
 6. **Corroboration:** not_assessed
    - Cross-source corroboration check not implemented in this run
 7. **Severity Support:** partial
-   - Partial severity support. Missing: extent (severity of harm)
-   - Missing: extent (severity of harm)
+   - Partial severity support. Missing: extent (severity of harm) [LLM: The text provides some information on political bias in Chinese media, but does not directly address claims of systematic/widespread human rights violations. The text focuses on media ownership, control, and bias, but does not provide evidence on the extent, systematicity, or institutionalization of human rights abuses.]
+   - Missing: extent (scale/severity of harm), systematicity (pattern/frequency of abuses), institutionalization (state apparatus involvement)
 
 ### Publisher Signals (Optional)
 
 8. **Ownership Transparency:** not_assessed
 9. **Corrections Behavior:** not_assessed
 10. **Standards Transparency:** not_assessed
+
+### LLM Augmentation
+- LLM used: Yes
+- Decisions augmented: severity_support
 
 ### Evidence Pages Fetched
 - https://bfi.uchicago.edu/wp-content/uploads/Media_Bias-2016Nov21.pdf
@@ -2545,8 +2621,8 @@ _Evaluator: v6 (HRF Practical v1)_
 6. **Corroboration:** not_assessed
    - Cross-source corroboration check not implemented in this run
 7. **Severity Support:** partial
-   - Partial severity support. Missing: extent (severity of harm)
-   - Missing: extent (severity of harm)
+   - Partial severity support. Missing: extent (severity of harm) [LLM: The text provides some information about human rights concerns in China, such as the persecution of religious minorities in Xinjiang and the use of surveillance technology. However, it does not provide clear evidence of systematic or widespread human rights violations across China.]
+   - Missing: extent (severity of harm), systematicity (pattern/frequency), institutionalization (state apparatus involvement)
 
 ### Publisher Signals (Optional)
 
@@ -2556,6 +2632,10 @@ _Evaluator: v6 (HRF Practical v1)_
 
 ### Warnings
 - Bot-block/anti-automation detected
+
+### LLM Augmentation
+- LLM used: Yes
+- Decisions augmented: severity_support
 
 ### Evidence Pages Fetched
 - https://www.wired.com/story/china-social-credit-score-system/
@@ -2662,6 +2742,10 @@ _Evaluator: v6 (HRF Practical v1)_
    - Ownership/governance information found on publisher pages
 9. **Corrections Behavior:** not_assessed
 10. **Standards Transparency:** not_assessed
+
+### LLM Augmentation
+- LLM used: Yes
+- Decisions augmented: severity_support
 
 ### Evidence Pages Fetched
 - http://www.cnfocus.com/debunking-the-chinese-debttrap-narrative-in-3-steps/
@@ -2770,7 +2854,7 @@ _Evaluator: v6 (HRF Practical v1)_
 6. **Corroboration:** not_assessed
    - Cross-source corroboration check not implemented in this run
 7. **Severity Support:** partial
-   - Partial severity support. Missing: extent (severity of harm)
+   - Partial severity support. Missing: extent (severity of harm) [LLM: The text provides some evidence of human rights violations, such as the crackdown on protesters, the cancellation of the artist's exhibition, and the erosion of civil liberties in Hong Kong. However, it does not provide detailed information on the scale, severity, or systematic nature of the violations.]
    - Missing: extent (severity of harm)
 
 ### Publisher Signals (Optional)
@@ -2781,7 +2865,10 @@ _Evaluator: v6 (HRF Practical v1)_
 
 ### Warnings
 - Bot-block/anti-automation detected
-- Satire keywords in metadata - manual review recommended
+
+### LLM Augmentation
+- LLM used: Yes
+- Decisions augmented: satire_verification, severity_support
 
 ### Evidence Pages Fetched
 - https://www.codastory.com/disinformation/memes-satire-hongkong-frontlines/
@@ -2820,6 +2907,10 @@ _Evaluator: v6 (HRF Practical v1)_
 8. **Ownership Transparency:** not_assessed
 9. **Corrections Behavior:** not_assessed
 10. **Standards Transparency:** not_assessed
+
+### LLM Augmentation
+- LLM used: Yes
+- Decisions augmented: severity_support
 
 ### Evidence Pages Fetched
 - https://www.wsws.org/en/articles/2023/02/06/pers-f06.html
@@ -2862,6 +2953,10 @@ _Evaluator: v6 (HRF Practical v1)_
 
 ### Warnings
 - Bot-block/anti-automation detected
+
+### LLM Augmentation
+- LLM used: Yes
+- Decisions augmented: severity_support
 
 ### Evidence Pages Fetched
 - https://www.commondreams.org/opinion/chinese-balloon-media-hysteria
@@ -2911,8 +3006,8 @@ _Evaluator: v6 (HRF Practical v1)_
 ## https://www.cnbc.com/2017/03/15/china-currency-manipulator-claims-are-false-sp-global-ratings.html
 
 **Domain:** cnbc.com
-**Use Permission:** C: Context-only
-**Reason:** Evidence too weak for factual support - use as context only
+**Use Permission:** B: Usable with safeguards
+**Reason:** Secondary reporting - must corroborate for key claims
 
 ### Core Checks
 
@@ -2922,8 +3017,8 @@ _Evaluator: v6 (HRF Practical v1)_
    - Reason: Third-party source - potentially eligible for B use
 3. **Completeness:** complete
    - Full content retrieved (2714 chars) despite access warnings
-4. **Evidence Strength:** weak
-   - Assertions without clear evidence trail
+4. **Evidence Strength:** medium
+   - Assertions without clear evidence trail [LLM: Uses some data and expert analysis, but lacks primary sources]
 5. **Specificity:** Yes
    - Contains traceable anchors: dates/times (2 found); quantities (7 found); named actors (4 found)
 6. **Corroboration:** not_assessed
@@ -2939,6 +3034,10 @@ _Evaluator: v6 (HRF Practical v1)_
 
 ### Warnings
 - Bot-block/anti-automation detected
+
+### LLM Augmentation
+- LLM used: Yes
+- Decisions augmented: evidence_strength
 
 ### Evidence Pages Fetched
 - https://www.cnbc.com/2017/03/15/china-currency-manipulator-claims-are-false-sp-global-ratings.html
@@ -3066,6 +3165,10 @@ _Evaluator: v6 (HRF Practical v1)_
 ### Warnings
 - Bot-block/anti-automation detected
 
+### LLM Augmentation
+- LLM used: Yes
+- Decisions augmented: severity_support
+
 ### Evidence Pages Fetched
 - https://warontherocks.com/2015/02/a-shaky-case-for-chinese-deception-a-review-of-the-hundred-year-marathon/
 - https://warontherocks.com/about/
@@ -3077,8 +3180,8 @@ _Evaluator: v6 (HRF Practical v1)_
 ## https://www.cnn.com/2012/11/27/world/asia/north-korea-china-onion
 
 **Domain:** cnn.com
-**Use Permission:** C: Context-only
-**Reason:** Lacks traceable anchors (who/what/when/where) - use as context only
+**Use Permission:** B: Usable with safeguards
+**Reason:** Lacks traceable anchors (who/what/when/where) - use as context only [LLM upgraded: The source has clear attribution to CNN, and includes specific details and quotes that can be verified, such as the Onion editor's comments and the Chinese news site's response. This provides enough context and evidence to use the information with appropriate safeguards.]
 
 ### Core Checks
 
@@ -3106,6 +3209,10 @@ _Evaluator: v6 (HRF Practical v1)_
 
 ### Warnings
 - Bot-block/anti-automation detected
+
+### LLM Augmentation
+- LLM used: Yes
+- Decisions augmented: final_review_upgrade
 
 ### Evidence Pages Fetched
 - https://www.cnn.com/2012/11/27/world/asia/north-korea-china-onion
@@ -3337,6 +3444,10 @@ _Evaluator: v6 (HRF Practical v1)_
 9. **Corrections Behavior:** not_assessed
 10. **Standards Transparency:** not_assessed
 
+### LLM Augmentation
+- LLM used: Yes
+- Decisions augmented: severity_support
+
 ### Evidence Pages Fetched
 - https://www.globaltimes.cn/content/961959.shtml
 - http://www.globaltimes.cn/about-us/
@@ -3352,9 +3463,9 @@ _Evaluator: v6 (HRF Practical v1)_
 ### Core Checks
 
 1. **Intended Use:** B
-2. **Relationship:** third_party
-   - A-only restriction: False
-   - Reason: Third-party source - potentially eligible for B use
+2. **Relationship:** self_interest
+   - A-only restriction: True
+   - Reason: LLM detected self-interest: Article describes CGTN as a state-owned Chinese media outlet
 3. **Completeness:** complete
    - Full content retrieved (32961 chars) despite access warnings
 4. **Evidence Strength:** strong
@@ -3376,6 +3487,10 @@ _Evaluator: v6 (HRF Practical v1)_
 
 ### Warnings
 - Bot-block/anti-automation detected
+
+### LLM Augmentation
+- LLM used: Yes
+- Decisions augmented: self_interest
 
 ### Evidence Pages Fetched
 - https://en.wikipedia.org/wiki/China_Global_Television_Network
@@ -3521,8 +3636,8 @@ _Evaluator: v6 (HRF Practical v1)_
 6. **Corroboration:** not_assessed
    - Cross-source corroboration check not implemented in this run
 7. **Severity Support:** partial
-   - Partial severity support. Missing: extent (severity of harm)
-   - Missing: extent (severity of harm)
+   - Partial severity support. Missing: extent (severity of harm) [LLM: The text discusses the exchange rate policy debate between China and the United States, but does not provide direct evidence of systematic or widespread human rights violations. It suggests that the developed world, led by the US, frames economic policy debates in moral terms to its own advantage, but does not substantiate claims of human rights abuses.]
+   - Missing: extent (severity of harm), systematicity (pattern/frequency of abuses), institutionalization (state apparatus involvement)
 
 ### Publisher Signals (Optional)
 
@@ -3533,6 +3648,10 @@ _Evaluator: v6 (HRF Practical v1)_
 
 ### Warnings
 - Bot-block/anti-automation detected
+
+### LLM Augmentation
+- LLM used: Yes
+- Decisions augmented: severity_support
 
 ### Evidence Pages Fetched
 - https://harvardlawreview.org/print/vol-136/when-powers-clash-an-amoral-appraisal-of-rmb-usd-interactions/
@@ -3545,8 +3664,8 @@ _Evaluator: v6 (HRF Practical v1)_
 ## https://blog.richardvanhooijdonk.com/en/the-truth-about-chinas-futuristic-ghost-cities/
 
 **Domain:** richardvanhooijdonk.com
-**Use Permission:** C: Context-only
-**Reason:** Evidence too weak for factual support - use as context only
+**Use Permission:** B: Usable with safeguards
+**Reason:** Secondary reporting - must corroborate for key claims
 
 ### Core Checks
 
@@ -3556,8 +3675,8 @@ _Evaluator: v6 (HRF Practical v1)_
    - Reason: Third-party source - potentially eligible for B use
 3. **Completeness:** complete
    - Full content retrieved (5055 chars) despite access warnings
-4. **Evidence Strength:** weak
-   - Assertions without clear evidence trail
+4. **Evidence Strength:** medium
+   - Assertions without clear evidence trail [LLM: some direct quotes and specific details but lacks primary evidence]
 5. **Specificity:** Yes
    - Contains traceable anchors: dates/times (4 found); locations (5 found); quantities (5 found); named actors (3 found)
 6. **Corroboration:** not_assessed
@@ -3572,6 +3691,10 @@ _Evaluator: v6 (HRF Practical v1)_
 
 ### Warnings
 - Bot-block/anti-automation detected
+
+### LLM Augmentation
+- LLM used: Yes
+- Decisions augmented: evidence_strength
 
 ### Evidence Pages Fetched
 - https://blog.richardvanhooijdonk.com/en/the-truth-about-chinas-futuristic-ghost-cities/
@@ -3602,7 +3725,7 @@ _Evaluator: v6 (HRF Practical v1)_
 6. **Corroboration:** not_assessed
    - Cross-source corroboration check not implemented in this run
 7. **Severity Support:** partial
-   - Partial severity support. Missing: extent (severity of harm)
+   - Partial severity support. Missing: extent (severity of harm) [LLM: The text provides some information on the phenomenon of underoccupied or 'ghost' cities in China, but does not directly address claims of systematic or widespread human rights violations. The text highlights that the 'ghost city' narrative may not accurately reflect the realities of China's urbanization efforts, and that many of these developments are part of long-term planning strategies. However, the text does not provide information on the scale, severity, or systematic nature of any potential human rights issues related to these developments.]
    - Missing: extent (severity of harm)
 
 ### Publisher Signals (Optional)
@@ -3613,6 +3736,10 @@ _Evaluator: v6 (HRF Practical v1)_
 
 ### Warnings
 - Bot-block/anti-automation detected
+
+### LLM Augmentation
+- LLM used: Yes
+- Decisions augmented: severity_support
 
 ### Evidence Pages Fetched
 - https://en.wikipedia.org/wiki/Underoccupied_developments_in_China
@@ -3655,6 +3782,10 @@ _Evaluator: v6 (HRF Practical v1)_
 
 ### Warnings
 - Bot-block/anti-automation detected
+
+### LLM Augmentation
+- LLM used: Yes
+- Decisions augmented: severity_support
 
 ### Evidence Pages Fetched
 - https://u.osu.edu/mclc/2020/01/30/wuhan-virus-is-not-a-lab-made-bioweapon/
