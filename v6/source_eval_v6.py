@@ -115,6 +115,13 @@ POLICY_KEYWORDS = [
 KNOWN_SATIRE_DOMAINS = {"theonion.com", "babylonbee.com", "clickhole.com"}
 SATIRE_KEYWORDS = ["satire", "parody", "humor", "humour", "comedy site"]
 
+# Known satire accounts on social media platforms (case-insensitive patterns in URL path)
+KNOWN_SATIRE_ACCOUNTS = [
+    "/theonion/", "/theonion", "/@theonion",
+    "/babylonbee/", "/babylonbee", "/@babylonbee",
+    "/clickhole/", "/clickhole", "/@clickhole",
+]
+
 # Paywall/bot detection
 PAYWALL_HINTS = [
     "subscribe to continue", "subscribe now", "sign in to continue",
@@ -1231,14 +1238,21 @@ def check_auto_reject(doc: FetchedDoc) -> Tuple[bool, str, bool]:
     """Check if source should be auto-rejected (satire, spam, etc.).
 
     Returns: (should_reject, reason, needs_llm_satire_review)
-    - should_reject: True only for KNOWN satire domains
+    - should_reject: True only for KNOWN satire domains or satire accounts on platforms
     - needs_llm_satire_review: True if satire signals detected but needs LLM verification
     """
     domain = doc.domain.lower()
+    url_lower = (doc.url or "").lower()
 
     # Known satire domains - definite reject, no LLM needed
     if domain in KNOWN_SATIRE_DOMAINS:
         return True, f"Known satire site: {domain}", False
+
+    # Known satire accounts on social media platforms (e.g., facebook.com/TheOnion)
+    # These are satire organizations posting on other platforms
+    for pattern in KNOWN_SATIRE_ACCOUNTS:
+        if pattern in url_lower:
+            return True, f"Known satire account on {domain}: {pattern.strip('/')}", False
 
     # Satire signals in metadata - FLAG for LLM review, don't auto-reject
     # This catches articles ABOUT satire which are NOT satire themselves
