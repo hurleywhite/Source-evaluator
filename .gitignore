@@ -1,4 +1,28 @@
+# Cache directories
 .cache_hrf_eval/
+.cache_source_eval/
+.cache_sources/
+.cache_sources_v2/
+.cache_sources_v3/
+.cache_sources_v4/
+.cache_web_eval/
+
+# Virtual environments
 .venv/
+.venv312/
+
+# Python
 __pycache__/
 *.pyc
+
+# OS
+.DS_Store
+
+# Node (presentation build artifacts)
+outputs/node_modules/
+outputs/package.json
+outputs/package-lock.json
+
+# Temp/generated outputs
+outputs/slide-*.jpg
+outputs/*.pdf

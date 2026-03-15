@@ -1,0 +1,81 @@
+[
+  {
+    "url": "https://www.bbc.com/news/articles/c8rm20gm364o",
+    "final_url": "https://www.bbc.com/news/articles/c8rm20gm364o",
+    "domain": "www.bbc.com",
+    "use_permission": "B: Usable with safeguards",
+    "permission_reason": "Secondary reporting - must corroborate for key claims",
+    "core_checks": {
+      "intended_use": "B",
+      "relationship": {
+        "type": "third_party",
+        "a_only_restriction": false,
+        "reason": "Third-party source - potentially eligible for B use"
+      },
+      "completeness": {
+        "status": "complete",
+        "reason": "Full content retrieved (5842 chars)"
+      },
+      "evidence_strength": {
+        "level": "medium",
+        "reason": "Secondary reporting with attribution",
+        "quotes": [
+          "ed by launching a military campaign in Gaza, during which more than 71,660 people have been killed, according to the Hamas-run health ministry. Since the ceasefire began on 10 October 2025, at least 492 Palestini",
+          "osing it. I was having a hard time to find hope in this place. Many times I lost hope completely. I said to myself: 'This is the last place you will see alive.'\" It is the first time since 2014 that there"
+        ]
+      },
+      "specificity": {
+        "has_anchors": true,
+        "reason": "Contains traceable anchors: dates/times (4 found); locations (5 found); named actors (5 found)",
+        "anchors": [
+          "dates/times (4 found)",
+          "locations (5 found)",
+          "named actors (5 found)"
+        ]
+      },
+      "corroboration": {
+        "status": "not_assessed",
+        "reason": "Single-source run - corroboration not assessed"
+      },
+      "severity_support": {
+        "claim_detected": false,
+        "status": "not_applicable",
+        "reason": "No systematic/widespread claims detected",
+        "missing": []
+      }
+    },
+    "publisher_signals": {
+      "ownership_transparency": {
+        "status": "not_assessed",
+        "assessed": false,
+        "reason": "Not found in retrieved pages",
+        "quotes": []
+      },
+      "corrections_behavior": {
+        "status": "not_assessed",
+        "assessed": false,
+        "reason": "Not found in retrieved pages",
+        "quotes": []
+      },
+      "standards_transparency": {
+        "status": "not_assessed",
+        "assessed": false,
+        "reason": "Not found in retrieved pages",
+        "quotes": []
+      }
+    },
+    "metadata": {
+      "fetch_status": "ok",
+      "content_type": "text/html; charset=utf-8",
+      "text_length": 5842,
+      "evidence_pages": [
+        "https://www.bbc.com/news/articles/c8rm20gm364o",
+        "https://www.bbc.com/contact"
+      ],
+      "warnings": [],
+      "llm_used": false,
+      "llm_error": "",
+      "llm_decisions": []
+    }
+  }
+]

@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HRF Source Evaluator</title>
+<style>
+  :root {
+    --navy: #1A2332;
+    --slate: #2D3E50;
+    --gold: #D4A843;
+    --light-gold: #E8C876;
+    --off-white: #F5F3EF;
+    --white: #FFFFFF;
+    --body-text: #3A3A3A;
+    --muted: #4B5563;
+    --green: #1B7340;
+    --green-light: #2D8659;
+    --blue: #3B7CB8;
+    --amber: #C4880B;
+    --brown: #8B6914;
+    --red: #B83B3B;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--off-white);
+    color: var(--body-text);
+    min-height: 100vh;
+  }
+
+  /* Header */
+  .header {
+    background: var(--navy);
+    border-bottom: 4px solid var(--gold);
+    padding: 1.5rem 2rem;
+  }
+  .header h1 {
+    color: var(--white);
+    font-family: Georgia, serif;
+    font-size: 1.75rem;
+    font-weight: 700;
+  }
+  .header p {
+    color: var(--light-gold);
+    font-size: 0.9rem;
+    margin-top: 0.25rem;
+  }
+
+  /* Main container */
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  /* Input panel */
+  .input-panel {
+    background: var(--white);
+    border-radius: 8px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    padding: 2rem;
+    margin-bottom: 2rem;
+  }
+  .input-panel h2 {
+    font-family: Georgia, serif;
+    color: var(--navy);
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+  }
+
+  /* Tabs */
+  .tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid #E5E7EB;
+  }
+  .tab {
+    padding: 0.6rem 1.5rem;
+    cursor: pointer;
+    border: none;
+    background: none;
+    font-size: 0.9rem;
+    color: var(--muted);
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    transition: all 0.2s;
+  }
+  .tab.active {
+    color: var(--navy);
+    border-bottom-color: var(--gold);
+    font-weight: 600;
+  }
+  .tab:hover { color: var(--navy); }
+
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* Form elements */
+  textarea, input[type="url"] {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #D1D5DB;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    resize: vertical;
+    transition: border-color 0.2s;
+  }
+  textarea:focus, input[type="url"]:focus {
+    outline: none;
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(212, 168, 67, 0.15);
+  }
+  textarea { min-height: 150px; }
+
+  label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--navy);
+    margin-bottom: 0.4rem;
+  }
+  .hint {
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-top: 0.3rem;
+  }
+
+  .form-row {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 1.25rem;
+    align-items: flex-end;
+  }
+  .form-group { flex: 1; }
+
+  select {
+    width: 100%;
+    padding: 0.6rem 0.75rem;
+    border: 1px solid #D1D5DB;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    background: var(--white);
+    cursor: pointer;
+  }
+  select:focus { outline: none; border-color: var(--gold); }
+
+  /* Toggle */
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.5rem 0;
+  }
+  .toggle {
+    position: relative;
+    width: 44px;
+    height: 24px;
+    cursor: pointer;
+  }
+  .toggle input { display: none; }
+  .toggle-slider {
+    position: absolute;
+    inset: 0;
+    background: #D1D5DB;
+    border-radius: 12px;
+    transition: 0.3s;
+  }
+  .toggle-slider:before {
+    content: "";
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    left: 3px;
+    top: 3px;
+    background: var(--white);
+    border-radius: 50%;
+    transition: 0.3s;
+  }
+  .toggle input:checked + .toggle-slider {
+    background: var(--gold);
+  }
+  .toggle input:checked + .toggle-slider:before {
+    transform: translateX(20px);
+  }
+
+  /* Single URL input */
+  .url-add-row {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+  }
+  .url-add-row input { flex: 1; }
+  .btn-add {
+    padding: 0.6rem 1rem;
+    background: var(--slate);
+    color: var(--white);
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    white-space: nowrap;
+  }
+  .btn-add:hover { background: var(--navy); }
+
+  .url-list {
+    list-style: none;
+    max-height: 200px;
+    overflow-y: auto;
+  }
+  .url-list li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.4rem 0.6rem;
+    border-bottom: 1px solid #F3F4F6;
+    font-size: 0.85rem;
+    font-family: monospace;
+  }
+  .url-list li .remove {
+    color: var(--red);
+    cursor: pointer;
+    font-size: 0.75rem;
+    border: none;
+    background: none;
+    padding: 0.2rem 0.4rem;
+  }
+
+  .url-count {
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-top: 0.5rem;
+  }
+
+  /* File upload */
+  .file-drop {
+    border: 2px dashed #D1D5DB;
+    border-radius: 8px;
+    padding: 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .file-drop:hover, .file-drop.dragover {
+    border-color: var(--gold);
+    background: rgba(212, 168, 67, 0.05);
+  }
+  .file-drop input { display: none; }
+  .file-drop p { color: var(--muted); font-size: 0.9rem; }
+  .file-drop .icon { font-size: 2rem; margin-bottom: 0.5rem; }
+
+  /* Buttons */
+  .btn-evaluate {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 2rem;
+    background: var(--gold);
+    color: var(--navy);
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 1.5rem;
+    transition: all 0.2s;
+  }
+  .btn-evaluate:hover { background: var(--light-gold); }
+  .btn-evaluate:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* Progress */
+  .progress-panel {
+    display: none;
+    background: var(--white);
+    border-radius: 8px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    text-align: center;
+  }
+  .progress-bar-outer {
+    width: 100%;
+    height: 8px;
+    background: #E5E7EB;
+    border-radius: 4px;
+    margin: 1rem 0;
+    overflow: hidden;
+  }
+  .progress-bar-inner {
+    height: 100%;
+    background: var(--gold);
+    border-radius: 4px;
+    transition: width 0.5s ease;
+    width: 0%;
+  }
+  .progress-text {
+    font-size: 0.9rem;
+    color: var(--muted);
+  }
+  .spinner {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    border: 3px solid #E5E7EB;
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-bottom: 0.75rem;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Results */
+  .results-panel {
+    display: none;
+  }
+  .results-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.25rem;
+  }
+  .results-header h2 {
+    font-family: Georgia, serif;
+    color: var(--navy);
+    font-size: 1.25rem;
+  }
+
+  /* Summary bar */
+  .summary-bar {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+  }
+  .summary-chip {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+  .summary-chip .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+  }
+
+  /* Result cards */
+  .result-card {
+    background: var(--white);
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    margin-bottom: 0.75rem;
+    overflow: hidden;
+    border-left: 5px solid #D1D5DB;
+  }
+  .result-card.perm-b-preferred { border-left-color: var(--green); }
+  .result-card.perm-b-safeguards { border-left-color: var(--green-light); }
+  .result-card.perm-c-context { border-left-color: var(--blue); }
+  .result-card.perm-a-narrative { border-left-color: var(--amber); }
+  .result-card.perm-manual { border-left-color: var(--brown); }
+  .result-card.perm-do-not-use { border-left-color: var(--red); }
+
+  .result-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    user-select: none;
+  }
+  .result-card-header:hover { background: #FAFAF8; }
+
+  .result-url {
+    font-family: monospace;
+    font-size: 0.85rem;
+    color: var(--navy);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 60%;
+  }
+
+  .result-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .badge-b-preferred { background: #D1FAE5; color: var(--green); }
+  .badge-b-safeguards { background: #D1FAE5; color: var(--green-light); }
+  .badge-c-context { background: #DBEAFE; color: var(--blue); }
+  .badge-a-narrative { background: #FEF3C7; color: var(--amber); }
+  .badge-manual { background: #FEF3C7; color: var(--brown); }
+  .badge-do-not-use { background: #FEE2E2; color: var(--red); }
+
+  .result-details {
+    display: none;
+    padding: 0 1rem 1rem;
+    border-top: 1px solid #F3F4F6;
+  }
+  .result-details.open { display: block; }
+
+  .detail-row {
+    display: flex;
+    gap: 0.75rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #F9FAFB;
+    font-size: 0.85rem;
+  }
+  .detail-label {
+    font-weight: 600;
+    color: var(--navy);
+    min-width: 140px;
+    flex-shrink: 0;
+  }
+  .detail-value { color: var(--muted); }
+  .detail-value.reason { font-style: italic; }
+
+  .quote {
+    background: #F9FAFB;
+    border-left: 3px solid var(--gold);
+    padding: 0.4rem 0.6rem;
+    margin: 0.25rem 0;
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+
+  .btn-export {
+    padding: 0.5rem 1rem;
+    background: var(--slate);
+    color: var(--white);
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+  }
+  .btn-export:hover { background: var(--navy); }
+
+  .error-msg {
+    background: #FEE2E2;
+    color: var(--red);
+    padding: 1rem;
+    border-radius: 6px;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Source Evaluator</h1>
+  <p>Automated Source Credibility Assessment for Human Rights Documentation</p>
+</div>
+
+<div class="container">
+  <!-- Input Panel -->
+  <div class="input-panel" id="inputPanel">
+    <h2>Evaluate Sources</h2>
+
+    <div class="tabs">
+      <button class="tab active" data-tab="bulk">Paste URLs</button>
+      <button class="tab" data-tab="single">Add One-by-One</button>
+      <button class="tab" data-tab="upload">Upload File</button>
+    </div>
+
+    <!-- Bulk paste -->
+    <div class="tab-content active" id="tab-bulk">
+      <label for="urlsTextarea">URLs (one per line)</label>
+      <textarea id="urlsTextarea" placeholder="https://www.bbc.com/news/world-12345&#10;https://www.reuters.com/article/example&#10;https://www.hrw.org/report/2024/..."></textarea>
+      <p class="hint">Paste one URL per line. Blank lines and non-URL lines are ignored.</p>
+    </div>
+
+    <!-- Single add -->
+    <div class="tab-content" id="tab-single">
+      <label>Add URLs individually</label>
+      <div class="url-add-row">
+        <input type="url" id="singleUrlInput" placeholder="https://example.com/article">
+        <button class="btn-add" id="btnAddUrl">+ Add</button>
+      </div>
+      <ul class="url-list" id="urlList"></ul>
+      <p class="url-count" id="urlCount">0 URLs added</p>
+    </div>
+
+    <!-- File upload -->
+    <div class="tab-content" id="tab-upload">
+      <div class="file-drop" id="fileDrop">
+        <input type="file" id="fileInput" accept=".txt,.csv">
+        <div class="icon">&#128196;</div>
+        <p>Drop a .txt file here or click to browse</p>
+        <p class="hint" style="margin-top:0.5rem">Text file with one URL per line</p>
+      </div>
+      <p class="url-count" id="fileUrlCount"></p>
+    </div>
+
+    <!-- Options row -->
+    <div class="form-row">
+      <div class="form-group">
+        <label for="intendedUse">Intended Use</label>
+        <select id="intendedUse">
+          <option value="B" selected>B - Factual claims (strictest)</option>
+          <option value="A">A - Narrative / attribution</option>
+          <option value="C">C - Context / background</option>
+        </select>
+        <p class="hint">How will these sources be used in your documentation?</p>
+      </div>
+      <div class="form-group">
+        <label>AI Review</label>
+        <div class="toggle-row">
+          <label class="toggle">
+            <input type="checkbox" id="useLlm" checked>
+            <span class="toggle-slider"></span>
+          </label>
+          <span style="font-size:0.85rem;color:var(--muted)">Enable Claude AI for nuanced review</span>
+        </div>
+        <p class="hint">Uses Anthropic API. Disable for heuristics-only mode.</p>
+      </div>
+    </div>
+
+    <button class="btn-evaluate" id="btnEvaluate">
+      <span>&#9654;</span> Evaluate Sources
+    </button>
+  </div>
+
+  <!-- Progress -->
+  <div class="progress-panel" id="progressPanel">
+    <div class="spinner"></div>
+    <h2 style="font-family:Georgia,serif;color:var(--navy);margin-bottom:0.5rem">Evaluating Sources</h2>
+    <p class="progress-text" id="progressText">Starting evaluation...</p>
+    <div class="progress-bar-outer">
+      <div class="progress-bar-inner" id="progressBar"></div>
+    </div>
+  </div>
+
+  <!-- Error -->
+  <div class="error-msg" id="errorMsg" style="display:none"></div>
+
+  <!-- Results -->
+  <div class="results-panel" id="resultsPanel">
+    <div class="results-header">
+      <h2 id="resultsTitle">Results</h2>
+      <button class="btn-export" id="btnExport">Export JSON</button>
+    </div>
+    <div class="summary-bar" id="summaryBar"></div>
+    <div id="resultsList"></div>
+  </div>
+</div>
+
+<script>
+// ── State ──
+let singleUrls = [];
+let fileUrls = [];
+let currentJobId = null;
+let currentResults = null;
+
+// ── Tabs ──
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+  });
+});
+
+// ── Single URL add ──
+const singleInput = document.getElementById('singleUrlInput');
+const urlList = document.getElementById('urlList');
+const urlCount = document.getElementById('urlCount');
+
+function renderUrlList() {
+  urlList.innerHTML = singleUrls.map((u, i) =>
+    `<li><span>${u}</span><button class="remove" onclick="removeSingleUrl(${i})">&#10005;</button></li>`
+  ).join('');
+  urlCount.textContent = `${singleUrls.length} URL${singleUrls.length !== 1 ? 's' : ''} added`;
+}
+
+document.getElementById('btnAddUrl').addEventListener('click', () => {
+  const val = singleInput.value.trim();
+  if (val && val.startsWith('http')) {
+    singleUrls.push(val);
+    singleInput.value = '';
+    renderUrlList();
+  }
+});
+
+singleInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    document.getElementById('btnAddUrl').click();
+  }
+});
+
+window.removeSingleUrl = (i) => {
+  singleUrls.splice(i, 1);
+  renderUrlList();
+};
+
+// ── File upload ──
+const fileDrop = document.getElementById('fileDrop');
+const fileInput = document.getElementById('fileInput');
+
+fileDrop.addEventListener('click', () => fileInput.click());
+fileDrop.addEventListener('dragover', (e) => { e.preventDefault(); fileDrop.classList.add('dragover'); });
+fileDrop.addEventListener('dragleave', () => fileDrop.classList.remove('dragover'));
+fileDrop.addEventListener('drop', (e) => {
+  e.preventDefault();
+  fileDrop.classList.remove('dragover');
+  if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener('change', () => { if (fileInput.files.length) handleFile(fileInput.files[0]); });
+
+async function handleFile(file) {
+  const formData = new FormData();
+  formData.append('file', file);
+  try {
+    const resp = await fetch('/api/upload-file', { method: 'POST', body: formData });
+    const data = await resp.json();
+    fileUrls = data.urls;
+    document.getElementById('fileUrlCount').textContent =
+      `Found ${data.count} URL${data.count !== 1 ? 's' : ''} in ${file.name}`;
+  } catch (err) {
+    document.getElementById('fileUrlCount').textContent = 'Error reading file';
+  }
+}
+
+// ── Collect all URLs ──
+function collectUrls() {
+  const activeTab = document.querySelector('.tab.active').dataset.tab;
+  if (activeTab === 'bulk') {
+    const text = document.getElementById('urlsTextarea').value;
+    return text.split('\n').map(l => l.trim()).filter(l => l.startsWith('http'));
+  } else if (activeTab === 'single') {
+    return [...singleUrls];
+  } else {
+    return [...fileUrls];
+  }
+}
+
+// ── Evaluate ──
+document.getElementById('btnEvaluate').addEventListener('click', startEvaluation);
+
+async function startEvaluation() {
+  const urls = collectUrls();
+  if (!urls.length) {
+    showError('No valid URLs to evaluate. Enter at least one URL starting with http.');
+    return;
+  }
+
+  hideError();
+  document.getElementById('resultsPanel').style.display = 'none';
+  document.getElementById('progressPanel').style.display = 'block';
+  document.getElementById('btnEvaluate').disabled = true;
+  document.getElementById('progressText').textContent = `Evaluating ${urls.length} source${urls.length !== 1 ? 's' : ''}...`;
+  document.getElementById('progressBar').style.width = '5%';
+
+  try {
+    const formData = new FormData();
+    formData.append('urls', urls.join('\n'));
+    formData.append('intended_use', document.getElementById('intendedUse').value);
+    formData.append('use_llm', document.getElementById('useLlm').checked);
+
+    const resp = await fetch('/api/evaluate', { method: 'POST', body: formData });
+    const data = await resp.json();
+
+    if (data.error) { showError(data.error); resetUI(); return; }
+
+    currentJobId = data.job_id;
+    pollJob(data.job_id, data.total);
+  } catch (err) {
+    showError('Failed to start evaluation: ' + err.message);
+    resetUI();
+  }
+}
+
+async function pollJob(jobId, total) {
+  const poll = async () => {
+    try {
+      const resp = await fetch(`/api/status/${jobId}`);
+      const data = await resp.json();
+
+      if (data.status === 'running') {
+        const pct = Math.max(10, Math.min(90, (data.completed / total) * 100));
+        document.getElementById('progressBar').style.width = pct + '%';
+        document.getElementById('progressText').textContent =
+          `Evaluating... this may take a few minutes for ${total} sources`;
+        setTimeout(poll, 2000);
+      } else if (data.status === 'done') {
+        document.getElementById('progressBar').style.width = '100%';
+        const resultsResp = await fetch(`/api/results/${jobId}`);
+        const resultsData = await resultsResp.json();
+        currentResults = resultsData.results;
+        renderResults(resultsData.results);
+        document.getElementById('progressPanel').style.display = 'none';
+        document.getElementById('btnEvaluate').disabled = false;
+      } else if (data.status === 'error') {
+        showError('Evaluation failed: ' + (data.error || 'Unknown error'));
+        resetUI();
+      }
+    } catch (err) {
+      showError('Lost connection to server');
+      resetUI();
+    }
+  };
+  setTimeout(poll, 2000);
+}
+
+// ── Permission helpers ──
+const PERM_MAP = {
+  'B: Preferred evidence': { cls: 'perm-b-preferred', badge: 'badge-b-preferred', short: 'Preferred', color: '#1B7340' },
+  'B: Usable with safeguards': { cls: 'perm-b-safeguards', badge: 'badge-b-safeguards', short: 'Usable', color: '#2D8659' },
+  'C: Context-only': { cls: 'perm-c-context', badge: 'badge-c-context', short: 'Context', color: '#3B7CB8' },
+  'A: Narrative-only': { cls: 'perm-a-narrative', badge: 'badge-a-narrative', short: 'Narrative', color: '#C4880B' },
+  'Manual retrieval needed': { cls: 'perm-manual', badge: 'badge-manual', short: 'Manual', color: '#8B6914' },
+  'Do not use': { cls: 'perm-do-not-use', badge: 'badge-do-not-use', short: 'Do Not Use', color: '#B83B3B' },
+};
+
+function permInfo(perm) {
+  return PERM_MAP[perm] || { cls: '', badge: '', short: perm, color: '#999' };
+}
+
+// ── Render results ──
+function renderResults(results) {
+  document.getElementById('resultsPanel').style.display = 'block';
+  document.getElementById('resultsTitle').textContent = `Results (${results.length} sources)`;
+
+  // Summary
+  const counts = {};
+  results.forEach(r => {
+    const p = r.use_permission || 'Unknown';
+    counts[p] = (counts[p] || 0) + 1;
+  });
+
+  const summaryBar = document.getElementById('summaryBar');
+  summaryBar.innerHTML = Object.entries(counts)
+    .sort((a, b) => b[1] - a[1])
+    .map(([perm, count]) => {
+      const info = permInfo(perm);
+      return `<span class="summary-chip" style="background:${info.color}15;color:${info.color}">
+        <span class="dot" style="background:${info.color}"></span>
+        ${info.short}: ${count}
+      </span>`;
+    }).join('');
+
+  // Cards
+  const list = document.getElementById('resultsList');
+  list.innerHTML = results.map((r, i) => {
+    const info = permInfo(r.use_permission);
+    const core = r.core_checks || {};
+    const pub = r.publisher_signals || {};
+    const meta = r.metadata || {};
+
+    return `<div class="result-card ${info.cls}">
+      <div class="result-card-header" onclick="toggleDetails(${i})">
+        <span class="result-url" title="${r.url}">${r.url}</span>
+        <span class="result-badge ${info.badge}">${r.use_permission}</span>
+      </div>
+      <div class="result-details" id="details-${i}">
+        <div class="detail-row">
+          <span class="detail-label">Reason</span>
+          <span class="detail-value reason">${r.permission_reason || ''}</span>
+        </div>
+        ${core.relationship ? `<div class="detail-row">
+          <span class="detail-label">Relationship</span>
+          <span class="detail-value">${core.relationship.type || ''}${core.relationship.a_only_restriction ? ' (A-only restricted)' : ''}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Relationship Detail</span>
+          <span class="detail-value">${core.relationship.reason || ''}</span>
+        </div>` : ''}
+        ${core.evidence_strength ? `<div class="detail-row">
+          <span class="detail-label">Evidence Strength</span>
+          <span class="detail-value">${core.evidence_strength.level || ''} &mdash; ${core.evidence_strength.reason || ''}</span>
+        </div>
+        ${(core.evidence_strength.quotes || []).length ? `<div class="detail-row">
+          <span class="detail-label">Evidence Quotes</span>
+          <span class="detail-value">${core.evidence_strength.quotes.slice(0,3).map(q => `<div class="quote">${escHtml(q)}</div>`).join('')}</span>
+        </div>` : ''}` : ''}
+        ${core.specificity ? `<div class="detail-row">
+          <span class="detail-label">Specificity</span>
+          <span class="detail-value">${core.specificity.has_anchors ? 'Yes' : 'No'} &mdash; ${core.specificity.reason || ''}</span>
+        </div>` : ''}
+        ${core.completeness ? `<div class="detail-row">
+          <span class="detail-label">Completeness</span>
+          <span class="detail-value">${core.completeness.status || ''} &mdash; ${core.completeness.reason || ''}</span>
+        </div>` : ''}
+        ${core.severity_support && core.severity_support.claim_detected ? `<div class="detail-row">
+          <span class="detail-label">Severity Support</span>
+          <span class="detail-value">${core.severity_support.status || ''} &mdash; ${core.severity_support.reason || ''}</span>
+        </div>` : ''}
+        <div class="detail-row">
+          <span class="detail-label">Fetch Status</span>
+          <span class="detail-value">${meta.fetch_status || ''} (${meta.text_length || 0} chars)</span>
+        </div>
+        ${meta.llm_used ? `<div class="detail-row">
+          <span class="detail-label">AI Review</span>
+          <span class="detail-value">Used for: ${(meta.llm_decisions || []).join(', ') || 'none'}</span>
+        </div>` : ''}
+        ${(meta.warnings || []).length ? `<div class="detail-row">
+          <span class="detail-label">Warnings</span>
+          <span class="detail-value">${meta.warnings.join('; ')}</span>
+        </div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function escHtml(s) {
+  const div = document.createElement('div');
+  div.textContent = s;
+  return div.innerHTML;
+}
+
+window.toggleDetails = (i) => {
+  document.getElementById('details-' + i).classList.toggle('open');
+};
+
+// ── Export ──
+document.getElementById('btnExport').addEventListener('click', () => {
+  if (!currentResults) return;
+  const blob = new Blob([JSON.stringify(currentResults, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'source_evaluation_results.json';
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+// ── Helpers ──
+function showError(msg) {
+  const el = document.getElementById('errorMsg');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+function hideError() { document.getElementById('errorMsg').style.display = 'none'; }
+function resetUI() {
+  document.getElementById('progressPanel').style.display = 'none';
+  document.getElementById('btnEvaluate').disabled = false;
+}
+</script>
+</body>
+</html>

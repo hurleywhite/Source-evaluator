@@ -1,0 +1,158 @@
+"""
+Source Evaluator Web Interface
+FastAPI backend wrapping source_eval_v6.py via subprocess
+"""
+import json, asyncio, uuid, time, subprocess, tempfile, os
+from pathlib import Path
+
+from fastapi import FastAPI, UploadFile, File, Form
+from fastapi.responses import HTMLResponse, JSONResponse
+
+app = FastAPI(title="HRF Source Evaluator")
+
+PROJECT_DIR = Path(__file__).parent
+SCRIPT = PROJECT_DIR / "v6-v10" / "source_eval_v6.py"
+PYTHON = PROJECT_DIR / ".venv312" / "bin" / "python3"
+CACHE_DIR = PROJECT_DIR / ".cache_web_eval"
+
+# ── In-memory job store ──
+jobs: dict = {}
+
+
+@app.get("/", response_class=HTMLResponse)
+async def index():
+    html_path = PROJECT_DIR / "templates" / "index.html"
+    return HTMLResponse(html_path.read_text())
+
+
+@app.post("/api/evaluate")
+async def start_evaluation(
+    urls: str = Form(...),
+    intended_use: str = Form("B"),
+    use_llm: bool = Form(True),
+):
+    """Start a source evaluation job. Returns job_id immediately."""
+    url_list = [u.strip() for u in urls.replace(",", "\n").split("\n") if u.strip()]
+    url_list = [u for u in url_list if u.startswith("http")]
+
+    if not url_list:
+        return JSONResponse({"error": "No valid URLs provided"}, status_code=400)
+    if len(url_list) > 200:
+        return JSONResponse({"error": "Maximum 200 URLs per batch"}, status_code=400)
+
+    job_id = str(uuid.uuid4())[:8]
+    jobs[job_id] = {
+        "status": "running",
+        "total": len(url_list),
+        "completed": 0,
+        "results": [],
+        "started_at": time.time(),
+        "error": None,
+    }
+
+    asyncio.get_event_loop().run_in_executor(
+        None, _run_evaluation, job_id, url_list, intended_use, use_llm
+    )
+
+    return {"job_id": job_id, "total": len(url_list)}
+
+
+def _run_evaluation(job_id: str, urls: list, intended_use: str, use_llm: bool):
+    """Run source evaluation via subprocess."""
+    try:
+        # Write URLs to a temp file
+        tmp = tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False)
+        for u in urls:
+            tmp.write(u + "\n")
+        tmp.close()
+
+        # Output files
+        out_json = tempfile.mktemp(suffix=".json")
+        out_md = tempfile.mktemp(suffix=".md")
+
+        cmd = [
+            str(PYTHON), str(SCRIPT),
+            "--works-cited", tmp.name,
+            "--intended-use", intended_use.upper(),
+            "--cache-dir", str(CACHE_DIR),
+            "--out-json", out_json,
+            "--out-md", out_md,
+            "--sleep-s", "0.5",
+        ]
+        if not use_llm:
+            cmd.append("--no-llm")
+
+        result = subprocess.run(
+            cmd,
+            cwd=str(PROJECT_DIR),
+            capture_output=True,
+            text=True,
+            timeout=600,  # 10 min max
+        )
+
+        if os.path.exists(out_json):
+            with open(out_json, "r") as f:
+                result_dicts = json.load(f)
+            jobs[job_id]["results"] = result_dicts
+            jobs[job_id]["completed"] = len(result_dicts)
+            jobs[job_id]["status"] = "done"
+        else:
+            stderr = result.stderr[:500] if result.stderr else "No output produced"
+            jobs[job_id]["status"] = "error"
+            jobs[job_id]["error"] = f"Evaluation failed: {stderr}"
+
+        # Cleanup
+        for f in [tmp.name, out_json, out_md]:
+            try:
+                os.unlink(f)
+            except OSError:
+                pass
+
+    except subprocess.TimeoutExpired:
+        jobs[job_id]["status"] = "error"
+        jobs[job_id]["error"] = "Evaluation timed out (10 min limit)"
+    except Exception as e:
+        jobs[job_id]["status"] = "error"
+        jobs[job_id]["error"] = str(e)
+
+
+@app.get("/api/status/{job_id}")
+async def job_status(job_id: str):
+    job = jobs.get(job_id)
+    if not job:
+        return JSONResponse({"error": "Job not found"}, status_code=404)
+    return {
+        "status": job["status"],
+        "total": job["total"],
+        "completed": job["completed"],
+        "error": job["error"],
+    }
+
+
+@app.get("/api/results/{job_id}")
+async def job_results(job_id: str):
+    job = jobs.get(job_id)
+    if not job:
+        return JSONResponse({"error": "Job not found"}, status_code=404)
+    return {
+        "status": job["status"],
+        "total": job["total"],
+        "completed": job["completed"],
+        "results": job["results"],
+        "error": job["error"],
+    }
+
+
+@app.post("/api/upload-file")
+async def upload_file(file: UploadFile = File(...)):
+    content = await file.read()
+    text = content.decode("utf-8", errors="ignore")
+    urls = [line.strip() for line in text.split("\n") if line.strip().startswith("http")]
+    return {"urls": urls, "count": len(urls)}
+
+
+if __name__ == "__main__":
+    import uvicorn
+    print("\n  Source Evaluator Web Interface")
+    print(f"  Open http://localhost:8000 in your browser\n")
+    uvicorn.run(app, host="0.0.0.0", port=8000)
