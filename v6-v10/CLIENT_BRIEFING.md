@@ -39,10 +39,69 @@ Rather than producing subjective credibility scores, the tool outputs one of six
 ## What Was Built
 
 ### Technical Architecture
-- Python-based command-line tool (~1,800 lines)
+- Python-based evaluation engine (~1,800 lines)
+- Web interface for browser-based evaluation
 - Hybrid approach: fast heuristics + LLM augmentation for nuanced cases
 - Caching layer for efficient re-evaluation
 - Multiple output formats: JSON (audit trail), Markdown (human-readable), CSV (spreadsheet)
+
+### System Architecture
+
+```mermaid
+flowchart TB
+    subgraph Browser["🌐 Browser"]
+        UI["User enters URLs\n+ selects Intended Use A/B/C\n+ toggles AI Review"]
+        Submit["POST /api/evaluate"]
+        Poll["Poll /api/status\nevery 2 seconds"]
+        Display["Display color-coded\nresult cards"]
+    end
+
+    subgraph Server["⚙️ FastAPI Server (app.py)"]
+        API["Parse URLs\nGenerate job_id\nReturn immediately"]
+        JobStore["In-Memory Job Store\nstatus · total · completed · results"]
+        Thread["Background Thread\nsubprocess.run"]
+    end
+
+    subgraph Evaluator["🔍 Evaluation Engine (source_eval_v6.py)"]
+        Fetch["Fetch each URL\n+ publisher pages"]
+        Cache["Cache Layer"]
+        Heuristics["10-Criterion\nHeuristic Checks"]
+        LLM["Claude AI Review\nborderline cases"]
+        Classify["Determine\nUse Permission"]
+    end
+
+    subgraph Outputs["📊 Six Use Permissions"]
+        B1["✅ Preferred Evidence"]
+        B2["✅ Usable with Safeguards"]
+        C["🔵 Context Only"]
+        A["🟡 Narrative Only"]
+        M["🟤 Manual Retrieval"]
+        X["🔴 Do Not Use"]
+    end
+
+    UI --> Submit
+    Submit --> API
+    API --> JobStore
+    API --> Thread
+    Thread --> Fetch
+    Fetch <--> Cache
+    Fetch --> Heuristics
+
+    Heuristics -->|"~70-80% resolved"| Classify
+    Heuristics -->|"~20-30% borderline"| LLM
+    LLM --> Classify
+
+    Classify --> B1
+    Classify --> B2
+    Classify --> C
+    Classify --> A
+    Classify --> M
+    Classify --> X
+
+    Classify -->|"JSON results"| JobStore
+    Poll --> JobStore
+    JobStore -->|"status: done"| Display
+```
 
 ### 10-Criterion Evaluation Framework
 
@@ -154,12 +213,71 @@ The tool applies different standards based on source type:
 
 ---
 
+## Web Interface
+
+The Source Evaluator is available as a browser-based application:
+
+**Live URL:** [https://source-evaluator.vercel.app/](https://source-evaluator.vercel.app/)
+
+### How to Use
+
+**Step 1 — Enter Sources**
+
+The interface offers three ways to input URLs:
+
+| Input Method | How It Works |
+|---|---|
+| **Paste URLs** | Paste a list of URLs into the text box, one per line. Blank lines and non-URL lines are automatically ignored. |
+| **Add One-by-One** | Type a single URL and click **+ Add**. Repeat for each source. URLs are listed below the input and can be removed individually. |
+| **Upload File** | Drag and drop a `.txt` file (or click to browse). The file should contain one URL per line. The tool will parse and count the URLs automatically. |
+
+**Step 2 — Configure Settings**
+
+| Setting | Options | Description |
+|---|---|---|
+| **Intended Use** | B - Factual claims (strictest) | Use when sources will support factual claims in documentation |
+| | A - Narrative / attribution | Use when sources will be cited as "X claims..." |
+| | C - Context / background | Use when sources provide background or analysis |
+| **AI Review** | On (default) / Off | When enabled, Claude AI reviews borderline cases for nuanced assessment. When disabled, the tool uses heuristics only (faster, no API cost). |
+
+**Step 3 — Evaluate**
+
+Click **Evaluate Sources**. The tool will:
+1. Fetch each URL and extract its content
+2. Analyze against the 10-criterion framework
+3. Apply AI review for edge cases (if enabled)
+4. Display results as color-coded cards
+
+**Step 4 — Review Results**
+
+Each source receives a color-coded badge:
+- **Green** — Preferred Evidence or Usable with Safeguards (cite for factual claims)
+- **Blue** — Context Only (use for background, not factual support)
+- **Gold** — Narrative Only (cite as "X claims..." with attribution)
+- **Brown** — Manual Retrieval Needed (paywall detected, human must access)
+- **Red** — Do Not Use (satire, forums, unreliable)
+
+Click any result card to expand and see:
+- **Reason** — Why the tool assigned this permission
+- **Relationship** — Whether the source has self-interest in the claims
+- **Evidence Strength** — Strong, medium, or weak, with supporting quotes
+- **Specificity** — Whether the source contains verifiable details (who, what, when, where)
+- **Completeness** — How much content was successfully retrieved
+- **Warnings** — Paywalls, bot-blocks, or other access issues
+
+**Step 5 — Export**
+
+Click **Export JSON** to download the full audit trail for all evaluated sources.
+
+---
+
 ## Next Steps
 
-1. **Review QUICK_START_GUIDE.md** for operational instructions
-2. **Review VALIDATION_PROTOCOL.md** for accuracy tracking procedures
-3. **Conduct initial calibration** with 50-100 sources against human expert judgment
-4. **Establish feedback loop** to track researcher overrides and improve accuracy
+1. **Try the web interface** at [https://source-evaluator.vercel.app/](https://source-evaluator.vercel.app/)
+2. **Review QUICK_START_GUIDE.md** for command-line operational instructions
+3. **Review VALIDATION_PROTOCOL.md** for accuracy tracking procedures
+4. **Conduct initial calibration** with 50-100 sources against human expert judgment
+5. **Establish feedback loop** to track researcher overrides and improve accuracy
 
 ---
 
