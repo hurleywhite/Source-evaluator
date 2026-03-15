@@ -2,7 +2,7 @@
 Source Evaluator Web Interface
 FastAPI backend wrapping source_eval_v6.py via subprocess
 """
-import json, asyncio, uuid, time, subprocess, tempfile, os
+import json, asyncio, uuid, time, subprocess, tempfile, os, sys, shutil
 from pathlib import Path
 
 from fastapi import FastAPI, UploadFile, File, Form
@@ -12,8 +12,11 @@ app = FastAPI(title="HRF Source Evaluator")
 
 PROJECT_DIR = Path(__file__).parent
 SCRIPT = PROJECT_DIR / "v6-v10" / "source_eval_v6.py"
-PYTHON = PROJECT_DIR / ".venv312" / "bin" / "python3"
 CACHE_DIR = PROJECT_DIR / ".cache_web_eval"
+
+# Find Python: use local venv if available, otherwise system python
+_venv_python = PROJECT_DIR / ".venv312" / "bin" / "python3"
+PYTHON = str(_venv_python) if _venv_python.exists() else sys.executable
 
 # ── In-memory job store ──
 jobs: dict = {}

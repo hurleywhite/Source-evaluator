@@ -4,3 +4,8 @@ lxml
 python-dateutil
 tldextract
 readability-lxml
+anthropic
+fastapi
+uvicorn
+jinja2
+python-multipart
