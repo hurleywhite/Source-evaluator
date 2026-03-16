@@ -1,0 +1,41 @@
+# Virtual environments
+.venv/
+.venv312/
+v6-v10/venv/
+
+# Cache directories
+.cache_hrf_eval/
+.cache_source_eval/
+.cache_sources/
+.cache_sources_v2/
+.cache_sources_v3/
+.cache_sources_v4/
+.cache_web_eval/
+
+# Node modules / presentation outputs
+outputs/
+node_modules/
+
+# Generated files
+*.pptx
+*.pdf
+*.jpg
+*.png
+slide-*.jpg
+thumbnails.jpg
+
+# Python
+__pycache__/
+*.pyc
+
+# OS
+.DS_Store
+
+# Temp
+*.txt
+!requirements.txt
+.env
+.claude/
+
+# Source-evaluator subfolder (duplicate)
+Source-evaluator/

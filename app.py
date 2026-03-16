@@ -19,14 +19,16 @@ app = FastAPI(title="HRF Source Evaluator")
 
 PROJECT_DIR = Path(__file__).parent
 SCRIPT = PROJECT_DIR / "v6-v10" / "source_eval_v6.py"
-CACHE_DIR = PROJECT_DIR / ".cache_web_eval"
+
+# Detect if running on Vercel (serverless) vs local/Railway (server)
+IS_VERCEL = os.environ.get("VERCEL", "") == "1"
+
+# On Vercel, only /tmp is writable; locally use project dir
+CACHE_DIR = Path("/tmp/.cache_web_eval") if IS_VERCEL else PROJECT_DIR / ".cache_web_eval"
 
 # Find Python: use local venv if available, otherwise system python
 _venv_python = PROJECT_DIR / ".venv312" / "bin" / "python3"
 PYTHON = str(_venv_python) if _venv_python.exists() else sys.executable
-
-# Detect if running on Vercel (serverless) vs local/Railway (server)
-IS_VERCEL = os.environ.get("VERCEL", "") == "1"
 
 # Max URLs per request on Vercel (must complete within function timeout)
 VERCEL_MAX_URLS = 10
@@ -72,12 +74,18 @@ def _run_evaluation_sync(urls: list, intended_use: str, use_llm: bool) -> dict:
         if not use_llm:
             cmd.append("--no-llm")
 
+        # Set env vars — on Vercel, redirect tldextract cache to /tmp
+        env = os.environ.copy()
+        if IS_VERCEL:
+            env["TLDEXTRACT_CACHE"] = "/tmp/.tldextract_cache"
+
         result = subprocess.run(
             cmd,
             cwd=str(PROJECT_DIR),
             capture_output=True,
             text=True,
             timeout=300,  # 5 min max
+            env=env,
         )
 
         if os.path.exists(out_json):
@@ -85,8 +93,8 @@ def _run_evaluation_sync(urls: list, intended_use: str, use_llm: bool) -> dict:
                 result_dicts = json.load(f)
             return {"results": result_dicts, "error": None}
         else:
-            stderr = result.stderr[:500] if result.stderr else "No output produced"
-            stdout = result.stdout[:500] if result.stdout else ""
+            stderr = result.stderr[:2000] if result.stderr else "No output produced"
+            stdout = result.stdout[:2000] if result.stdout else ""
             return {
                 "results": [],
                 "error": f"Evaluation failed: {stderr}\n{stdout}".strip()
