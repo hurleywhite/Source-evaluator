@@ -26,3 +26,4 @@ outputs/package-lock.json
 # Temp/generated outputs
 outputs/slide-*.jpg
 outputs/*.pdf
+.env

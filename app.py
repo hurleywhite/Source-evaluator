@@ -1,9 +1,16 @@
 """
 Source Evaluator Web Interface
 FastAPI backend wrapping source_eval_v6.py via subprocess
+
+Supports two modes:
+- Synchronous (Vercel serverless): POST /api/evaluate returns results directly
+- Async (local/Railway): POST /api/evaluate-async starts a background job
 """
 import json, asyncio, uuid, time, subprocess, tempfile, os, sys, shutil
 from pathlib import Path
+
+from dotenv import load_dotenv
+load_dotenv()  # Load .env file (ANTHROPIC_API_KEY, etc.)
 
 from fastapi import FastAPI, UploadFile, File, Form
 from fastapi.responses import HTMLResponse, JSONResponse
@@ -18,7 +25,13 @@ CACHE_DIR = PROJECT_DIR / ".cache_web_eval"
 _venv_python = PROJECT_DIR / ".venv312" / "bin" / "python3"
 PYTHON = str(_venv_python) if _venv_python.exists() else sys.executable
 
-# ── In-memory job store ──
+# Detect if running on Vercel (serverless) vs local/Railway (server)
+IS_VERCEL = os.environ.get("VERCEL", "") == "1"
+
+# Max URLs per request on Vercel (must complete within function timeout)
+VERCEL_MAX_URLS = 10
+
+# ── In-memory job store (only used for local/Railway async mode) ──
 jobs: dict = {}
 
 
@@ -28,40 +41,14 @@ async def index():
     return HTMLResponse(html_path.read_text())
 
 
-@app.post("/api/evaluate")
-async def start_evaluation(
-    urls: str = Form(...),
-    intended_use: str = Form("B"),
-    use_llm: bool = Form(True),
-):
-    """Start a source evaluation job. Returns job_id immediately."""
-    url_list = [u.strip() for u in urls.replace(",", "\n").split("\n") if u.strip()]
-    url_list = [u for u in url_list if u.startswith("http")]
-
-    if not url_list:
-        return JSONResponse({"error": "No valid URLs provided"}, status_code=400)
-    if len(url_list) > 200:
-        return JSONResponse({"error": "Maximum 200 URLs per batch"}, status_code=400)
-
-    job_id = str(uuid.uuid4())[:8]
-    jobs[job_id] = {
-        "status": "running",
-        "total": len(url_list),
-        "completed": 0,
-        "results": [],
-        "started_at": time.time(),
-        "error": None,
-    }
-
-    asyncio.get_event_loop().run_in_executor(
-        None, _run_evaluation, job_id, url_list, intended_use, use_llm
-    )
-
-    return {"job_id": job_id, "total": len(url_list)}
-
-
-def _run_evaluation(job_id: str, urls: list, intended_use: str, use_llm: bool):
-    """Run source evaluation via subprocess."""
+def _run_evaluation_sync(urls: list, intended_use: str, use_llm: bool) -> dict:
+    """
+    Run source evaluation synchronously via subprocess.
+    Returns dict with 'results' or 'error'.
+    """
+    tmp = None
+    out_json = None
+    out_md = None
     try:
         # Write URLs to a temp file
         tmp = tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False)
@@ -90,33 +77,127 @@ def _run_evaluation(job_id: str, urls: list, intended_use: str, use_llm: bool):
             cwd=str(PROJECT_DIR),
             capture_output=True,
             text=True,
-            timeout=600,  # 10 min max
+            timeout=300,  # 5 min max
         )
 
         if os.path.exists(out_json):
             with open(out_json, "r") as f:
                 result_dicts = json.load(f)
-            jobs[job_id]["results"] = result_dicts
-            jobs[job_id]["completed"] = len(result_dicts)
-            jobs[job_id]["status"] = "done"
+            return {"results": result_dicts, "error": None}
         else:
             stderr = result.stderr[:500] if result.stderr else "No output produced"
-            jobs[job_id]["status"] = "error"
-            jobs[job_id]["error"] = f"Evaluation failed: {stderr}"
-
-        # Cleanup
-        for f in [tmp.name, out_json, out_md]:
-            try:
-                os.unlink(f)
-            except OSError:
-                pass
+            stdout = result.stdout[:500] if result.stdout else ""
+            return {
+                "results": [],
+                "error": f"Evaluation failed: {stderr}\n{stdout}".strip()
+            }
 
     except subprocess.TimeoutExpired:
-        jobs[job_id]["status"] = "error"
-        jobs[job_id]["error"] = "Evaluation timed out (10 min limit)"
+        return {"results": [], "error": "Evaluation timed out (5 min limit)"}
     except Exception as e:
+        return {"results": [], "error": str(e)}
+    finally:
+        # Cleanup temp files
+        for f in [tmp.name if tmp else None, out_json, out_md]:
+            if f:
+                try:
+                    os.unlink(f)
+                except OSError:
+                    pass
+
+
+@app.post("/api/evaluate")
+async def evaluate(
+    urls: str = Form(...),
+    intended_use: str = Form("B"),
+    use_llm: bool = Form(True),
+):
+    """
+    Synchronous evaluation endpoint (works on Vercel serverless).
+    Blocks until evaluation completes and returns results directly.
+    """
+    url_list = [u.strip() for u in urls.replace(",", "\n").split("\n") if u.strip()]
+    url_list = [u for u in url_list if u.startswith("http")]
+
+    if not url_list:
+        return JSONResponse({"error": "No valid URLs provided"}, status_code=400)
+
+    max_urls = VERCEL_MAX_URLS if IS_VERCEL else 200
+    if len(url_list) > max_urls:
+        return JSONResponse(
+            {"error": f"Maximum {max_urls} URLs per batch"
+                      + (" (serverless limit)" if IS_VERCEL else "")},
+            status_code=400
+        )
+
+    # Run synchronously — blocks until done
+    loop = asyncio.get_event_loop()
+    result = await loop.run_in_executor(
+        None, _run_evaluation_sync, url_list, intended_use, use_llm
+    )
+
+    if result["error"]:
+        return {
+            "status": "error",
+            "total": len(url_list),
+            "completed": len(result["results"]),
+            "results": result["results"],
+            "error": result["error"],
+        }
+
+    return {
+        "status": "done",
+        "total": len(url_list),
+        "completed": len(result["results"]),
+        "results": result["results"],
+        "error": None,
+    }
+
+
+# ── Legacy async endpoints (for local/Railway — NOT used on Vercel) ──
+
+@app.post("/api/evaluate-async")
+async def start_evaluation_async(
+    urls: str = Form(...),
+    intended_use: str = Form("B"),
+    use_llm: bool = Form(True),
+):
+    """Start a source evaluation job asynchronously. Returns job_id immediately."""
+    url_list = [u.strip() for u in urls.replace(",", "\n").split("\n") if u.strip()]
+    url_list = [u for u in url_list if u.startswith("http")]
+
+    if not url_list:
+        return JSONResponse({"error": "No valid URLs provided"}, status_code=400)
+    if len(url_list) > 200:
+        return JSONResponse({"error": "Maximum 200 URLs per batch"}, status_code=400)
+
+    job_id = str(uuid.uuid4())[:8]
+    jobs[job_id] = {
+        "status": "running",
+        "total": len(url_list),
+        "completed": 0,
+        "results": [],
+        "started_at": time.time(),
+        "error": None,
+    }
+
+    asyncio.get_event_loop().run_in_executor(
+        None, _run_evaluation_job, job_id, url_list, intended_use, use_llm
+    )
+
+    return {"job_id": job_id, "total": len(url_list)}
+
+
+def _run_evaluation_job(job_id: str, urls: list, intended_use: str, use_llm: bool):
+    """Background job runner for async mode."""
+    result = _run_evaluation_sync(urls, intended_use, use_llm)
+    if result["error"]:
         jobs[job_id]["status"] = "error"
-        jobs[job_id]["error"] = str(e)
+        jobs[job_id]["error"] = result["error"]
+    else:
+        jobs[job_id]["results"] = result["results"]
+        jobs[job_id]["completed"] = len(result["results"])
+        jobs[job_id]["status"] = "done"
 
 
 @app.get("/api/status/{job_id}")

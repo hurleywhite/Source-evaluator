@@ -651,6 +651,8 @@ function collectUrls() {
 // ── Evaluate ──
 document.getElementById('btnEvaluate').addEventListener('click', startEvaluation);
 
+let progressInterval = null;
+
 async function startEvaluation() {
   const urls = collectUrls();
   if (!urls.length) {
@@ -662,8 +664,18 @@ async function startEvaluation() {
   document.getElementById('resultsPanel').style.display = 'none';
   document.getElementById('progressPanel').style.display = 'block';
   document.getElementById('btnEvaluate').disabled = true;
-  document.getElementById('progressText').textContent = `Evaluating ${urls.length} source${urls.length !== 1 ? 's' : ''}...`;
+  document.getElementById('progressText').textContent =
+    `Evaluating ${urls.length} source${urls.length !== 1 ? 's' : ''}... this may take a minute or two`;
   document.getElementById('progressBar').style.width = '5%';
+
+  // Animate progress bar while waiting (fake progress for UX)
+  let fakePct = 5;
+  progressInterval = setInterval(() => {
+    if (fakePct < 85) {
+      fakePct += Math.random() * 3;
+      document.getElementById('progressBar').style.width = Math.min(fakePct, 85) + '%';
+    }
+  }, 2000);
 
   try {
     const formData = new FormData();
@@ -671,49 +683,39 @@ async function startEvaluation() {
     formData.append('intended_use', document.getElementById('intendedUse').value);
     formData.append('use_llm', document.getElementById('useLlm').checked);
 
+    // Synchronous call — waits for evaluation to complete
     const resp = await fetch('/api/evaluate', { method: 'POST', body: formData });
     const data = await resp.json();
 
-    if (data.error) { showError(data.error); resetUI(); return; }
+    clearInterval(progressInterval);
+    progressInterval = null;
 
-    currentJobId = data.job_id;
-    pollJob(data.job_id, data.total);
-  } catch (err) {
-    showError('Failed to start evaluation: ' + err.message);
-    resetUI();
-  }
-}
+    if (data.error && (!data.results || data.results.length === 0)) {
+      showError('Evaluation failed: ' + data.error);
+      resetUI();
+      return;
+    }
 
-async function pollJob(jobId, total) {
-  const poll = async () => {
-    try {
-      const resp = await fetch(`/api/status/${jobId}`);
-      const data = await resp.json();
+    if (data.status === 'done' || (data.results && data.results.length > 0)) {
+      document.getElementById('progressBar').style.width = '100%';
+      currentResults = data.results;
+      renderResults(data.results);
+      document.getElementById('progressPanel').style.display = 'none';
+      document.getElementById('btnEvaluate').disabled = false;
 
-      if (data.status === 'running') {
-        const pct = Math.max(10, Math.min(90, (data.completed / total) * 100));
-        document.getElementById('progressBar').style.width = pct + '%';
-        document.getElementById('progressText').textContent =
-          `Evaluating... this may take a few minutes for ${total} sources`;
-        setTimeout(poll, 2000);
-      } else if (data.status === 'done') {
-        document.getElementById('progressBar').style.width = '100%';
-        const resultsResp = await fetch(`/api/results/${jobId}`);
-        const resultsData = await resultsResp.json();
-        currentResults = resultsData.results;
-        renderResults(resultsData.results);
-        document.getElementById('progressPanel').style.display = 'none';
-        document.getElementById('btnEvaluate').disabled = false;
-      } else if (data.status === 'error') {
-        showError('Evaluation failed: ' + (data.error || 'Unknown error'));
-        resetUI();
+      // Show warning if there was a partial error
+      if (data.error) {
+        showError('Warning: ' + data.error);
       }
-    } catch (err) {
-      showError('Lost connection to server');
+    } else {
+      showError('Evaluation failed: ' + (data.error || 'No results returned'));
       resetUI();
     }
-  };
-  setTimeout(poll, 2000);
+  } catch (err) {
+    if (progressInterval) { clearInterval(progressInterval); progressInterval = null; }
+    showError('Failed to evaluate: ' + err.message);
+    resetUI();
+  }
 }
 
 // ── Permission helpers ──
