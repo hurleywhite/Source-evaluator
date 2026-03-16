@@ -62,6 +62,13 @@ def _run_evaluation_sync(urls: list, intended_use: str, use_llm: bool) -> dict:
         out_json = tempfile.mktemp(suffix=".json")
         out_md = tempfile.mktemp(suffix=".md")
 
+        # Faster settings for Vercel (no inter-request sleep, shorter timeouts,
+        # fewer auxiliary pages). Local mode keeps the polite defaults.
+        if IS_VERCEL:
+            sleep_s, timeout_s, max_aux = "0", "10", "2"
+        else:
+            sleep_s, timeout_s, max_aux = "0.5", "25", "3"
+
         cmd = [
             str(PYTHON), str(SCRIPT),
             "--works-cited", tmp.name,
@@ -69,7 +76,9 @@ def _run_evaluation_sync(urls: list, intended_use: str, use_llm: bool) -> dict:
             "--cache-dir", str(CACHE_DIR),
             "--out-json", out_json,
             "--out-md", out_md,
-            "--sleep-s", "0.5",
+            "--sleep-s", sleep_s,
+            "--timeout-s", timeout_s,
+            "--max-aux-pages", max_aux,
         ]
         if not use_llm:
             cmd.append("--no-llm")
