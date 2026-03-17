@@ -516,15 +516,15 @@
         <p class="hint">How will these sources be used in your documentation?</p>
       </div>
       <div class="form-group">
-        <label>AI Review</label>
+        <label>More Thorough Review</label>
         <div class="toggle-row">
           <label class="toggle">
             <input type="checkbox" id="useLlm" checked>
             <span class="toggle-slider"></span>
           </label>
-          <span style="font-size:0.85rem;color:var(--muted)">Enable Claude AI for nuanced review</span>
+          <span style="font-size:0.85rem;color:var(--muted)">Enable for more thorough review</span>
         </div>
-        <p class="hint">Uses Anthropic API. Disable for heuristics-only mode.</p>
+        <p class="hint">Adds deeper analysis. Disable for faster results.</p>
       </div>
     </div>
 
@@ -806,7 +806,7 @@ function renderResults(results) {
           <span class="detail-value">${meta.fetch_status || ''} (${meta.text_length || 0} chars)</span>
         </div>
         ${meta.llm_used ? `<div class="detail-row">
-          <span class="detail-label">AI Review</span>
+          <span class="detail-label">Thorough Review</span>
           <span class="detail-value">Used for: ${(meta.llm_decisions || []).join(', ') || 'none'}</span>
         </div>` : ''}
         ${(meta.warnings || []).length ? `<div class="detail-row">
