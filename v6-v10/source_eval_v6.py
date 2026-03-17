@@ -3,8 +3,8 @@
 Source Evaluator v6 — HRF Source Credibility Standard (Practical v1)
 
 Purpose: Evaluate sources for HRF's three intended uses:
-  A = narrative (what an actor claims)
-  B = factual support (what can be verified happened)
+  A = factual support (what can be verified happened)
+  B = narrative (what an actor claims)
   C = analysis/context (interpretation)
 
 Key principles:
@@ -15,10 +15,10 @@ Key principles:
 - Every decision points to retrieved evidence
 
 Output labels:
-- B: Preferred evidence
-- B: Usable with safeguards
+- A: Preferred evidence
+- A: Usable with safeguards
 - C: Context-only
-- A: Narrative-only
+- B: Narrative-only
 - Manual retrieval needed
 - Do not use
 """
@@ -175,8 +175,8 @@ INSTITUTIONALIZATION_HINTS = [
 # Enums and Data Models
 # -----------------------------------------------------------------------------
 class IntendedUse(str, Enum):
-    A = "A"  # Narrative
-    B = "B"  # Factual support
+    A = "A"  # Factual support
+    B = "B"  # Narrative
     C = "C"  # Analysis/context
 
 
@@ -214,10 +214,10 @@ class SeveritySupport(str, Enum):
 
 
 class UsePermission(str, Enum):
-    B_PREFERRED = "B: Preferred evidence"
-    B_SAFEGUARDS = "B: Usable with safeguards"
+    A_PREFERRED = "A: Preferred evidence"
+    A_SAFEGUARDS = "A: Usable with safeguards"
     C_CONTEXT = "C: Context-only"
-    A_NARRATIVE = "A: Narrative-only"
+    B_NARRATIVE = "B: Narrative-only"
     MANUAL_RETRIEVAL = "Manual retrieval needed"
     DO_NOT_USE = "Do not use"
 
@@ -273,7 +273,7 @@ class CoreChecks:
 
     # 2) Relationship / self-interest
     relationship: RelationshipType = RelationshipType.UNKNOWN
-    a_only_restriction: bool = False
+    b_only_restriction: bool = False
     relationship_reason: str = ""
 
     # 3) Access & completeness
@@ -713,11 +713,11 @@ HEURISTIC RESULT: {heuristic_permission}
 CHECKS SUMMARY: {core_checks_summary}
 
 The heuristics rated this as "Context-only". Review if it could be upgraded to:
-- "B: Usable with safeguards" (has attribution, some verifiable claims)
+- "A: Usable with safeguards" (has attribution, some verifiable claims)
 - Keep as "C: Context-only" (opinion, analysis without strong evidence)
 
 Respond ONLY with JSON:
-{{"permission": "B_SAFEGUARDS|C_CONTEXT", "reason": "brief explanation"}}"""
+{{"permission": "A_SAFEGUARDS|C_CONTEXT", "reason": "brief explanation"}}"""
 
     result = llm_review(client, prompt, model)
     if result and "permission" in result:
@@ -964,7 +964,7 @@ def crawl_publisher_pages(
 def assess_relationship(url: str, domain: str, text: str) -> Tuple[RelationshipType, bool, str]:
     """
     Check 2: Relationship / self-interest restriction.
-    Returns (relationship_type, a_only_restriction, reason)
+    Returns (relationship_type, b_only_restriction, reason)
 
     Key principle: Self-interest is about whether the source is making claims
     ABOUT ITSELF, not about whether it's an organization. A human rights org
@@ -1253,29 +1253,29 @@ def determine_use_permission(
     """
     reasons = []
 
-    # Rule: Wikipedia is a tertiary source - not suitable for B use
+    # Rule: Wikipedia is a tertiary source - not suitable for A (factual) use
     if "wikipedia.org" in domain.lower():
-        if intended_use == IntendedUse.B:
+        if intended_use == IntendedUse.A:
             return UsePermission.C_CONTEXT, "Wikipedia is a tertiary source - use for context only, cite primary sources for factual claims"
         return UsePermission.C_CONTEXT, "Wikipedia - tertiary source for context/background"
 
-    # Rule: Access failure caps B use
+    # Rule: Access failure caps A (factual) use
     if core.completeness == Completeness.FAILED:
         return UsePermission.MANUAL_RETRIEVAL, "Fetch failed - manual retrieval needed before assessment"
 
     if core.completeness == Completeness.PARTIAL:
-        if intended_use == IntendedUse.B:
-            return UsePermission.MANUAL_RETRIEVAL, "Partial content retrieved - manual retrieval needed for B use"
+        if intended_use == IntendedUse.A:
+            return UsePermission.MANUAL_RETRIEVAL, "Partial content retrieved - manual retrieval needed for A use"
 
-    # Rule: Self-interest/official sources default to A-only
-    if core.a_only_restriction:
-        if intended_use == IntendedUse.B:
-            return UsePermission.A_NARRATIVE, f"Self-interest/official source: {core.relationship_reason}"
-        elif intended_use == IntendedUse.A:
-            return UsePermission.A_NARRATIVE, "Valid for narrative use (what the source claims)"
+    # Rule: Self-interest/official sources default to B-only (narrative)
+    if core.b_only_restriction:
+        if intended_use == IntendedUse.A:
+            return UsePermission.B_NARRATIVE, f"Self-interest/official source: {core.relationship_reason}"
+        elif intended_use == IntendedUse.B:
+            return UsePermission.B_NARRATIVE, "Valid for narrative use (what the source claims)"
 
-    # For B (factual) use
-    if intended_use == IntendedUse.B:
+    # For A (factual) use
+    if intended_use == IntendedUse.A:
         # Check evidence strength
         if core.evidence_strength == EvidenceStrength.WEAK:
             return UsePermission.C_CONTEXT, "Evidence too weak for factual support - use as context only"
@@ -1289,17 +1289,17 @@ def determine_use_permission(
             if core.severity_missing:
                 reasons.append(f"Severity claim detected but missing: {', '.join(core.severity_missing)}")
 
-        # Determine B level
+        # Determine A level
         if core.evidence_strength == EvidenceStrength.STRONG:
             if core.completeness == Completeness.COMPLETE and core.has_specificity:
                 # Check corroboration for high-impact claims
                 if is_single_source:
-                    return UsePermission.B_SAFEGUARDS, "Strong evidence but single-source run - corroboration not assessed"
-                return UsePermission.B_PREFERRED, "Strong primary anchors, complete access, traceable"
+                    return UsePermission.A_SAFEGUARDS, "Strong evidence but single-source run - corroboration not assessed"
+                return UsePermission.A_PREFERRED, "Strong primary anchors, complete access, traceable"
 
         # Medium evidence
         if core.evidence_strength == EvidenceStrength.MEDIUM:
-            return UsePermission.B_SAFEGUARDS, "Secondary reporting - must corroborate for key claims"
+            return UsePermission.A_SAFEGUARDS, "Secondary reporting - must corroborate for key claims"
 
         return UsePermission.C_CONTEXT, "Insufficient evidence strength for factual support"
 
@@ -1309,10 +1309,10 @@ def determine_use_permission(
             return UsePermission.C_CONTEXT, "Valid for analysis/background context"
         return UsePermission.MANUAL_RETRIEVAL, "Insufficient content for context use"
 
-    # For A (narrative) use
-    if intended_use == IntendedUse.A:
+    # For B (narrative) use
+    if intended_use == IntendedUse.B:
         if core.completeness in (Completeness.COMPLETE, Completeness.PARTIAL):
-            return UsePermission.A_NARRATIVE, "Valid for narrative use (cite as 'X said...')"
+            return UsePermission.B_NARRATIVE, "Valid for narrative use (cite as 'X said...')"
         return UsePermission.MANUAL_RETRIEVAL, "Insufficient content to extract narrative"
 
     return UsePermission.DO_NOT_USE, "Could not determine appropriate use"
@@ -1434,7 +1434,7 @@ def evaluate_source(
     # Check 2: Relationship
     rel, a_only, rel_reason = assess_relationship(main.final_url or url, main.domain, main.text or "")
     core.relationship = rel
-    core.a_only_restriction = a_only
+    core.b_only_restriction = a_only
     core.relationship_reason = rel_reason
 
     # Check 3: Completeness
@@ -1495,7 +1495,7 @@ def evaluate_source(
                 # State media that heuristics missed (not on our list but LLM identified)
                 if src_type == "state_media":
                     core.relationship = RelationshipType.OFFICIAL_STATE
-                    core.a_only_restriction = True
+                    core.b_only_restriction = True
                     core.relationship_reason = f"LLM identified state media: {src_reason}"
 
                 # International NGO upgrade: Only boost evidence if LLM says strong
@@ -1527,7 +1527,7 @@ def evaluate_source(
             )
             if llm_self and llm_self[0]:
                 core.relationship = RelationshipType.SELF_INTEREST
-                core.a_only_restriction = True
+                core.b_only_restriction = True
                 core.relationship_reason = f"LLM detected self-interest: {llm_self[1]}"
                 result.llm_used = True
                 result.llm_decisions.append("self_interest")
@@ -1561,8 +1561,8 @@ def evaluate_source(
         )
         if llm_final:
             new_perm, new_reason = llm_final
-            if new_perm == "B_SAFEGUARDS":
-                use_perm = UsePermission.B_SAFEGUARDS
+            if new_perm == "A_SAFEGUARDS":
+                use_perm = UsePermission.A_SAFEGUARDS
                 perm_reason = f"{perm_reason} [LLM upgraded: {new_reason}]"
                 result.llm_used = True
                 result.llm_decisions.append("final_review_upgrade")
@@ -1652,7 +1652,7 @@ def render_report_md(results: List[EvalResult]) -> str:
         lines.append(f"1. **Intended Use:** {r.core.intended_use.value}")
 
         lines.append(f"2. **Relationship:** {r.core.relationship.value}")
-        lines.append(f"   - A-only restriction: {r.core.a_only_restriction}")
+        lines.append(f"   - B-only restriction: {r.core.b_only_restriction}")
         lines.append(f"   - Reason: {r.core.relationship_reason}")
 
         lines.append(f"3. **Completeness:** {r.core.completeness.value}")
@@ -1720,7 +1720,7 @@ def result_to_dict(r: EvalResult) -> Dict[str, Any]:
             "intended_use": r.core.intended_use.value,
             "relationship": {
                 "type": r.core.relationship.value,
-                "a_only_restriction": r.core.a_only_restriction,
+                "b_only_restriction": r.core.b_only_restriction,
                 "reason": r.core.relationship_reason,
             },
             "completeness": {
@@ -1791,7 +1791,7 @@ def parse_args(argv: Optional[List[str]] = None) -> argparse.Namespace:
     p.add_argument("--works-cited", default="", help="Path to works cited file with URLs")
     p.add_argument("--urls", default="", help="Comma-separated URLs to evaluate")
     p.add_argument("--intended-use", required=True, choices=["A", "B", "C"],
-                   help="A=narrative, B=factual support, C=analysis/context")
+                   help="A=factual support, B=narrative, C=analysis/context")
     p.add_argument("--cache-dir", default=".cache_hrf_eval")
     p.add_argument("--cache-max-age-s", type=int, default=7 * 24 * 3600)
     p.add_argument("--no-cache", action="store_true")

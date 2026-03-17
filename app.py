@@ -126,7 +126,7 @@ def _run_evaluation_sync(urls: list, intended_use: str, use_llm: bool) -> dict:
 @app.post("/api/evaluate")
 async def evaluate(
     urls: str = Form(...),
-    intended_use: str = Form("B"),
+    intended_use: str = Form("A"),
     use_llm: bool = Form(True),
 ):
     """
@@ -176,7 +176,7 @@ async def evaluate(
 @app.post("/api/evaluate-async")
 async def start_evaluation_async(
     urls: str = Form(...),
-    intended_use: str = Form("B"),
+    intended_use: str = Form("A"),
     use_llm: bool = Form(True),
 ):
     """Start a source evaluation job asynchronously. Returns job_id immediately."""

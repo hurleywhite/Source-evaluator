@@ -363,10 +363,10 @@
     overflow: hidden;
     border-left: 5px solid #D1D5DB;
   }
-  .result-card.perm-b-preferred { border-left-color: var(--green); }
-  .result-card.perm-b-safeguards { border-left-color: var(--green-light); }
+  .result-card.perm-a-preferred { border-left-color: var(--green); }
+  .result-card.perm-a-safeguards { border-left-color: var(--green-light); }
   .result-card.perm-c-context { border-left-color: var(--blue); }
-  .result-card.perm-a-narrative { border-left-color: var(--amber); }
+  .result-card.perm-b-narrative { border-left-color: var(--amber); }
   .result-card.perm-manual { border-left-color: var(--brown); }
   .result-card.perm-do-not-use { border-left-color: var(--red); }
 
@@ -397,10 +397,10 @@
     font-weight: 700;
     white-space: nowrap;
   }
-  .badge-b-preferred { background: #D1FAE5; color: var(--green); }
-  .badge-b-safeguards { background: #D1FAE5; color: var(--green-light); }
+  .badge-a-preferred { background: #D1FAE5; color: var(--green); }
+  .badge-a-safeguards { background: #D1FAE5; color: var(--green-light); }
   .badge-c-context { background: #DBEAFE; color: var(--blue); }
-  .badge-a-narrative { background: #FEF3C7; color: var(--amber); }
+  .badge-b-narrative { background: #FEF3C7; color: var(--amber); }
   .badge-manual { background: #FEF3C7; color: var(--brown); }
   .badge-do-not-use { background: #FEE2E2; color: var(--red); }
 
@@ -509,8 +509,8 @@
       <div class="form-group">
         <label for="intendedUse">Intended Use</label>
         <select id="intendedUse">
-          <option value="B" selected>B - Factual claims (strictest)</option>
-          <option value="A">A - Narrative / attribution</option>
+          <option value="A" selected>A - Factual claims (strictest)</option>
+          <option value="B">B - Narrative / attribution</option>
           <option value="C">C - Context / background</option>
         </select>
         <p class="hint">How will these sources be used in your documentation?</p>
@@ -720,10 +720,10 @@ async function startEvaluation() {
 
 // ── Permission helpers ──
 const PERM_MAP = {
-  'B: Preferred evidence': { cls: 'perm-b-preferred', badge: 'badge-b-preferred', short: 'Preferred', color: '#1B7340' },
-  'B: Usable with safeguards': { cls: 'perm-b-safeguards', badge: 'badge-b-safeguards', short: 'Usable', color: '#2D8659' },
+  'A: Preferred evidence': { cls: 'perm-a-preferred', badge: 'badge-a-preferred', short: 'Preferred', color: '#1B7340' },
+  'A: Usable with safeguards': { cls: 'perm-a-safeguards', badge: 'badge-a-safeguards', short: 'Usable', color: '#2D8659' },
   'C: Context-only': { cls: 'perm-c-context', badge: 'badge-c-context', short: 'Context', color: '#3B7CB8' },
-  'A: Narrative-only': { cls: 'perm-a-narrative', badge: 'badge-a-narrative', short: 'Narrative', color: '#C4880B' },
+  'B: Narrative-only': { cls: 'perm-b-narrative', badge: 'badge-b-narrative', short: 'Narrative', color: '#C4880B' },
   'Manual retrieval needed': { cls: 'perm-manual', badge: 'badge-manual', short: 'Manual', color: '#8B6914' },
   'Do not use': { cls: 'perm-do-not-use', badge: 'badge-do-not-use', short: 'Do Not Use', color: '#B83B3B' },
 };
