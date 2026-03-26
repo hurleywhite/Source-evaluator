@@ -1133,7 +1133,6 @@ def _process_response(doc: FetchedDoc, resp: requests.Response, url: str, cache_
     doc.bytes_downloaded = len(resp.content or b"")
 
     if resp.status_code >= 400:
-        doc.fetch_status = "http_error"
         # Distinguish paywall from generic HTTP errors
         domain = registrable_domain(url)
         if resp.status_code in (401, 403) and domain in KNOWN_PAYWALL_DOMAINS:
@@ -1144,6 +1143,27 @@ def _process_response(doc: FetchedDoc, resp: requests.Response, url: str, cache_
             doc.warnings.append(f"HTTP {resp.status_code} — page not found (link may be broken)")
         else:
             doc.warnings.append(f"HTTP {resp.status_code}")
+
+        # Some sites return 403 but still include article content in the response
+        # (e.g., soft paywalls, cookie-gated content). Try to extract it.
+        resp.encoding = resp.encoding or "utf-8"
+        html = resp.text or ""
+        if len(html) > 1000 and "text/html" in doc.content_type.lower():
+            meta, title, text = extract_from_html(html, doc.final_url or url)
+            if len(text) > 500:
+                # We got substantial content despite the error code
+                doc.html = html
+                doc.meta = meta
+                doc.title = title
+                doc.author = meta.get("author", "")
+                doc.published = meta.get("published_time", "")
+                doc.text = text
+                doc.fetch_status = "ok"  # Override — we got usable content
+                doc.warnings.append(f"Content extracted despite HTTP {resp.status_code}")
+            else:
+                doc.fetch_status = "http_error"
+        else:
+            doc.fetch_status = "http_error"
     elif "pdf" in doc.content_type.lower() or doc.final_url.lower().endswith(".pdf"):
         doc.fetch_status = "pdf"
         if HAS_PDFMINER:
