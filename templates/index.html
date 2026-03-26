@@ -665,9 +665,14 @@ async function startEvaluation() {
   }
 
   hideError();
-  document.getElementById('resultsPanel').style.display = 'none';
   document.getElementById('progressPanel').style.display = 'block';
   document.getElementById('btnEvaluate').disabled = true;
+
+  // Show results panel immediately (empty, will fill progressively)
+  document.getElementById('resultsPanel').style.display = 'block';
+  document.getElementById('resultsTitle').textContent = `Results (0 of ${urls.length} sources)`;
+  document.getElementById('summaryBar').innerHTML = '';
+  document.getElementById('resultsList').innerHTML = '';
 
   const BATCH_SIZE = 10;
   const batches = [];
@@ -701,7 +706,22 @@ async function startEvaluation() {
       const data = await resp.json();
 
       if (data.results && data.results.length > 0) {
+        // Append new results to running total
+        const prevCount = allResults.length;
         allResults = allResults.concat(data.results);
+        currentResults = allResults;
+
+        // Append new cards to the list (don't re-render everything)
+        const list = document.getElementById('resultsList');
+        data.results.forEach((r, ri) => {
+          const idx = prevCount + ri;
+          list.insertAdjacentHTML('beforeend', renderCard(r, idx));
+        });
+
+        // Update title and summary bar with ALL results so far
+        document.getElementById('resultsTitle').textContent =
+          `Results (${allResults.length} of ${urls.length} sources)`;
+        updateSummaryBar(allResults);
       }
       if (data.error) {
         warnings.push(`Batch ${b + 1}: ${data.error}`);
@@ -712,11 +732,13 @@ async function startEvaluation() {
       document.getElementById('progressBar').style.width = pct + '%';
     }
 
+    // All batches done
+    document.getElementById('progressPanel').style.display = 'none';
+    document.getElementById('btnEvaluate').disabled = false;
+
     if (allResults.length > 0) {
-      currentResults = allResults;
-      renderResults(allResults);
-      document.getElementById('progressPanel').style.display = 'none';
-      document.getElementById('btnEvaluate').disabled = false;
+      document.getElementById('resultsTitle').textContent =
+        `Results (${allResults.length} sources)`;
       if (warnings.length > 0) {
         showError('Warning: ' + warnings.join('; '));
       }
@@ -744,20 +766,14 @@ function permInfo(perm) {
   return PERM_MAP[perm] || { cls: '', badge: '', short: perm, color: '#999' };
 }
 
-// ── Render results ──
-function renderResults(results) {
-  document.getElementById('resultsPanel').style.display = 'block';
-  document.getElementById('resultsTitle').textContent = `Results (${results.length} sources)`;
-
-  // Summary
+// ── Render helpers ──
+function updateSummaryBar(results) {
   const counts = {};
   results.forEach(r => {
     const p = r.use_permission || 'Unknown';
     counts[p] = (counts[p] || 0) + 1;
   });
-
-  const summaryBar = document.getElementById('summaryBar');
-  summaryBar.innerHTML = Object.entries(counts)
+  document.getElementById('summaryBar').innerHTML = Object.entries(counts)
     .sort((a, b) => b[1] - a[1])
     .map(([perm, count]) => {
       const info = permInfo(perm);
@@ -766,94 +782,99 @@ function renderResults(results) {
         ${info.short}: ${count}
       </span>`;
     }).join('');
+}
 
-  // Cards
-  const list = document.getElementById('resultsList');
-  list.innerHTML = results.map((r, i) => {
-    const info = permInfo(r.use_permission);
-    const core = r.core_checks || {};
-    const pub = r.publisher_signals || {};
-    const meta = r.metadata || {};
+function renderCard(r, i) {
+  const info = permInfo(r.use_permission);
+  const core = r.core_checks || {};
+  const pub = r.publisher_signals || {};
+  const meta = r.metadata || {};
 
-    return `<div class="result-card ${info.cls}">
-      <div class="result-card-header" onclick="toggleDetails(${i})">
-        <span class="result-url" title="${r.url}">${r.url}</span>
-        <span class="result-badge ${info.badge}">${r.use_permission}</span>
+  return `<div class="result-card ${info.cls}">
+    <div class="result-card-header" onclick="toggleDetails(${i})">
+      <span class="result-url" title="${r.url}">${r.url}</span>
+      <span class="result-badge ${info.badge}">${r.use_permission}</span>
+    </div>
+    <div class="result-details" id="details-${i}">
+      <div class="detail-row">
+        <span class="detail-label">Reason</span>
+        <span class="detail-value reason">${r.permission_reason || ''}</span>
       </div>
-      <div class="result-details" id="details-${i}">
-        <div class="detail-row">
-          <span class="detail-label">Reason</span>
-          <span class="detail-value reason">${r.permission_reason || ''}</span>
-        </div>
-        ${core.relationship ? `<div class="detail-row">
-          <span class="detail-label">Relationship</span>
-          <span class="detail-value">${core.relationship.type || ''}${core.relationship.a_only_restriction ? ' (A-only restricted)' : ''}</span>
-        </div>
-        <div class="detail-row">
-          <span class="detail-label">Relationship Detail</span>
-          <span class="detail-value">${core.relationship.reason || ''}</span>
-        </div>` : ''}
-        ${core.evidence_strength ? `<div class="detail-row">
-          <span class="detail-label">Evidence Strength</span>
-          <span class="detail-value">${core.evidence_strength.level || ''} &mdash; ${core.evidence_strength.reason || ''}</span>
-        </div>
-        ${(core.evidence_strength.quotes || []).length ? `<div class="detail-row">
-          <span class="detail-label">Evidence Quotes</span>
-          <span class="detail-value">${core.evidence_strength.quotes.slice(0,3).map(q => `<div class="quote">${escHtml(q)}</div>`).join('')}</span>
-        </div>` : ''}` : ''}
-        ${core.specificity ? `<div class="detail-row">
-          <span class="detail-label">Specificity</span>
-          <span class="detail-value">${core.specificity.has_anchors ? 'Yes' : 'No'} &mdash; ${core.specificity.reason || ''}</span>
-        </div>` : ''}
-        ${core.completeness ? `<div class="detail-row">
-          <span class="detail-label">Completeness</span>
-          <span class="detail-value">${core.completeness.status || ''} &mdash; ${core.completeness.reason || ''}</span>
-        </div>` : ''}
-        ${core.severity_support && core.severity_support.claim_detected ? `<div class="detail-row">
-          <span class="detail-label">Severity Support</span>
-          <span class="detail-value">${core.severity_support.status || ''} &mdash; ${core.severity_support.reason || ''}</span>
-        </div>` : ''}
-        <div class="detail-row">
-          <span class="detail-label">Fetch Status</span>
-          <span class="detail-value">${meta.fetch_status || ''} (${meta.text_length || 0} chars)</span>
-        </div>
-        ${r.content_analysis && r.content_analysis.analyzed ? `
-        <div class="detail-row" style="margin-top:0.75rem;border-top:1px solid #ddd;padding-top:0.75rem">
-          <span class="detail-label" style="font-weight:700;color:var(--navy)">Content Analysis</span>
-          <span class="detail-value">Confidence: <strong>${r.content_analysis.confidence_level}</strong></span>
-        </div>
-        <div class="detail-row">
-          <span class="detail-label">Summary</span>
-          <span class="detail-value">${escHtml(r.content_analysis.confidence_summary || '')}</span>
-        </div>
-        ${(r.content_analysis.claims || []).length ? `<div class="detail-row">
-          <span class="detail-label">Claims Analyzed</span>
-          <span class="detail-value">${r.content_analysis.claims.map((c, ci) =>
-            '<div style="margin-bottom:0.4rem;padding:0.3rem 0;border-bottom:1px dotted #e0e0e0">' +
-            '<strong>[' + (c.plausibility || '?') + ']</strong> ' +
-            escHtml(c.text || '') +
-            (c.has_attribution ? ' <span style="color:var(--green);font-size:0.8rem">✓ attributed</span>' : ' <span style="color:var(--red);font-size:0.8rem">✗ unattributed</span>') +
-            (c.attribution_detail && c.attribution_detail !== 'none' ? ' <span style="color:var(--muted);font-size:0.8rem">(' + escHtml(c.attribution_detail) + ')</span>' : '') +
-            ((c.red_flags || []).length ? '<br><span style="color:var(--red);font-size:0.8rem">⚠ ' + c.red_flags.map(f => escHtml(f)).join('; ') + '</span>' : '') +
-            '</div>'
-          ).join('')}</span>
-        </div>` : ''}
-        ${(r.content_analysis.contradiction_flags || []).length ? `<div class="detail-row">
-          <span class="detail-label" style="color:var(--red)">Contradictions Found</span>
-          <span class="detail-value" style="color:var(--red)">${r.content_analysis.contradiction_flags.map(f => escHtml(f)).join('<br>')}</span>
-        </div>` : ''}
-        ` : ''}
-        ${meta.llm_used ? `<div class="detail-row">
-          <span class="detail-label">Thorough Review</span>
-          <span class="detail-value">Used for: ${(meta.llm_decisions || []).join(', ') || 'none'}</span>
-        </div>` : ''}
-        ${(meta.warnings || []).length ? `<div class="detail-row">
-          <span class="detail-label">Warnings</span>
-          <span class="detail-value">${meta.warnings.join('; ')}</span>
-        </div>` : ''}
+      ${core.relationship ? `<div class="detail-row">
+        <span class="detail-label">Relationship</span>
+        <span class="detail-value">${core.relationship.type || ''}${core.relationship.a_only_restriction ? ' (A-only restricted)' : ''}</span>
       </div>
-    </div>`;
-  }).join('');
+      <div class="detail-row">
+        <span class="detail-label">Relationship Detail</span>
+        <span class="detail-value">${core.relationship.reason || ''}</span>
+      </div>` : ''}
+      ${core.evidence_strength ? `<div class="detail-row">
+        <span class="detail-label">Evidence Strength</span>
+        <span class="detail-value">${core.evidence_strength.level || ''} &mdash; ${core.evidence_strength.reason || ''}</span>
+      </div>
+      ${(core.evidence_strength.quotes || []).length ? `<div class="detail-row">
+        <span class="detail-label">Evidence Quotes</span>
+        <span class="detail-value">${core.evidence_strength.quotes.slice(0,3).map(q => `<div class="quote">${escHtml(q)}</div>`).join('')}</span>
+      </div>` : ''}` : ''}
+      ${core.specificity ? `<div class="detail-row">
+        <span class="detail-label">Specificity</span>
+        <span class="detail-value">${core.specificity.has_anchors ? 'Yes' : 'No'} &mdash; ${core.specificity.reason || ''}</span>
+      </div>` : ''}
+      ${core.completeness ? `<div class="detail-row">
+        <span class="detail-label">Completeness</span>
+        <span class="detail-value">${core.completeness.status || ''} &mdash; ${core.completeness.reason || ''}</span>
+      </div>` : ''}
+      ${core.severity_support && core.severity_support.claim_detected ? `<div class="detail-row">
+        <span class="detail-label">Severity Support</span>
+        <span class="detail-value">${core.severity_support.status || ''} &mdash; ${core.severity_support.reason || ''}</span>
+      </div>` : ''}
+      <div class="detail-row">
+        <span class="detail-label">Fetch Status</span>
+        <span class="detail-value">${meta.fetch_status || ''} (${meta.text_length || 0} chars)</span>
+      </div>
+      ${r.content_analysis && r.content_analysis.analyzed ? `
+      <div class="detail-row" style="margin-top:0.75rem;border-top:1px solid #ddd;padding-top:0.75rem">
+        <span class="detail-label" style="font-weight:700;color:var(--navy)">Content Analysis</span>
+        <span class="detail-value">Confidence: <strong>${r.content_analysis.confidence_level}</strong></span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Summary</span>
+        <span class="detail-value">${escHtml(r.content_analysis.confidence_summary || '')}</span>
+      </div>
+      ${(r.content_analysis.claims || []).length ? `<div class="detail-row">
+        <span class="detail-label">Claims Analyzed</span>
+        <span class="detail-value">${r.content_analysis.claims.map((c, ci) =>
+          '<div style="margin-bottom:0.4rem;padding:0.3rem 0;border-bottom:1px dotted #e0e0e0">' +
+          '<strong>[' + (c.plausibility || '?') + ']</strong> ' +
+          escHtml(c.text || '') +
+          (c.has_attribution ? ' <span style="color:var(--green);font-size:0.8rem">✓ attributed</span>' : ' <span style="color:var(--red);font-size:0.8rem">✗ unattributed</span>') +
+          (c.attribution_detail && c.attribution_detail !== 'none' ? ' <span style="color:var(--muted);font-size:0.8rem">(' + escHtml(c.attribution_detail) + ')</span>' : '') +
+          ((c.red_flags || []).length ? '<br><span style="color:var(--red);font-size:0.8rem">⚠ ' + c.red_flags.map(f => escHtml(f)).join('; ') + '</span>' : '') +
+          '</div>'
+        ).join('')}</span>
+      </div>` : ''}
+      ${(r.content_analysis.contradiction_flags || []).length ? `<div class="detail-row">
+        <span class="detail-label" style="color:var(--red)">Contradictions Found</span>
+        <span class="detail-value" style="color:var(--red)">${r.content_analysis.contradiction_flags.map(f => escHtml(f)).join('<br>')}</span>
+      </div>` : ''}
+      ` : ''}
+      ${meta.llm_used ? `<div class="detail-row">
+        <span class="detail-label">Thorough Review</span>
+        <span class="detail-value">Used for: ${(meta.llm_decisions || []).join(', ') || 'none'}</span>
+      </div>` : ''}
+      ${(meta.warnings || []).length ? `<div class="detail-row">
+        <span class="detail-label">Warnings</span>
+        <span class="detail-value">${meta.warnings.join('; ')}</span>
+      </div>` : ''}
+    </div>
+  </div>`;
+}
+
+function renderResults(results) {
+  document.getElementById('resultsPanel').style.display = 'block';
+  document.getElementById('resultsTitle').textContent = `Results (${results.length} sources)`;
+  updateSummaryBar(results);
+  document.getElementById('resultsList').innerHTML = results.map((r, i) => renderCard(r, i)).join('');
 }
 
 function escHtml(s) {
