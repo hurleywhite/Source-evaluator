@@ -113,41 +113,60 @@ POLICY_KEYWORDS = [
 
 # Auto-reject domains — international satire/comedy publications
 KNOWN_SATIRE_DOMAINS = {
-    # English-language
+    # English-language — US
     "theonion.com", "babylonbee.com", "clickhole.com",
-    "thebeaverton.com",          # Canada
-    "thedailymash.co.uk",        # UK
-    "newsthump.com",             # UK
-    "waterfordwhispersnews.com", # Ireland
-    "betootaadvocate.com",       # Australia
-    "theshovel.com.au",          # Australia
-    "thecivilian.co.nz",         # New Zealand
-    "borowitz.com",              # US (Borowitz Report)
-    "thehardtimes.net",          # US punk/music satire
-    "reductress.com",            # US
-    "pointandclickbait.com",     # Gaming satire
-    "duffelblog.com",            # US military satire
+    "borowitz.com",              # Borowitz Report
+    "thehardtimes.net",          # punk/music satire
+    "reductress.com",            # feminist satire
+    "pointandclickbait.com",     # gaming satire
+    "duffelblog.com",            # military satire
+    "mcsweeneys.net",            # McSweeney's Internet Tendency (humor/satire)
+    # English-language — Canada
+    "thebeaverton.com",
+    # English-language — UK
+    "thedailymash.co.uk",
+    "newsthump.com",
+    "thedailymash.com",          # UK (alt domain)
+    # English-language — Ireland
+    "waterfordwhispersnews.com",
+    # English-language — Australia
+    "betootaadvocate.com",
+    "theshovel.com.au",
+    "chaser.com.au",             # The Chaser
+    # English-language — New Zealand
+    "thecivilian.co.nz",
+    # English-language — South Africa
+    "nduna.co.za",
+    "hayibo.com",                # South African satire
+    # English-language — Nigeria
+    "themaizereport.com",
+    # English-language — India
+    "fakingnews.firstpost.com",
+    "theunrealtimes.com",
+    "fauxy.com",                 # India
     # French
     "legorafi.fr",               # France
+    "nordpresse.be",             # Belgium
     # German
     "der-postillon.com",         # Germany
     "postillon.com",             # Germany (alt)
+    "tagespresse.at",            # Austria
     # Spanish
     "elmundotoday.com",          # Spain
     "elpejotero.com",            # Latin America
     "actualidadpanamericana.com",# Colombia
+    "haynoticia.es",             # Spain
     # Italian
     "lercio.it",                 # Italy
     # Portuguese / Brazilian
     "sensacionalista.com.br",    # Brazil
+    "piaui.folha.uol.com.br",   # Brazil (Piauí Herald)
     # Nordic
     "ransen.net",                # Sweden
+    "rokansen.se",               # Sweden
     # Russian
     "panorama.pub",              # Russia
-    # Indian
-    "fakingnews.firstpost.com",  # India
-    "theunrealtimes.com",        # India
-    # Middle East
+    # Arabic / Middle East
     "alhudood.net",              # Arabic satire
     # Chinese-language
     "babylonbee.cn",             # Chinese satire mirror
@@ -155,9 +174,6 @@ KNOWN_SATIRE_DOMAINS = {
     "kyoko-np.net",              # Japan (fake news satire)
     # Korean
     "notrealnews.kr",            # Korea
-    # African
-    "nduna.co.za",               # South Africa
-    "themaizereport.com",        # Nigeria
 }
 SATIRE_KEYWORDS = [
     "satire", "parody", "humor", "humour", "comedy site",
@@ -616,8 +632,8 @@ def llm_assess_satire(
     model: str = DEFAULT_LLM_MODEL
 ) -> Optional[Tuple[bool, str]]:
     """LLM review for satire/parody. Returns (is_satire, reason) or None."""
-    truncated = text[:2000] if len(text) > 2000 else text
-    prompt = f"""You must determine if THIS SOURCE should be rejected as satire.
+    truncated = text[:3000] if len(text) > 3000 else text
+    prompt = f"""Determine if this source is satire, parody, or humor that should NEVER be cited as fact.
 
 SOURCE DOMAIN: {domain}
 ARTICLE TITLE: {title}
@@ -625,34 +641,43 @@ ARTICLE TITLE: {title}
 TEXT EXCERPT:
 {truncated}
 
-CRITICAL: Distinguish between SOURCE and SUBJECT.
-- SOURCE = the website/publication hosting this content (the DOMAIN above)
-- SUBJECT = what the article is ABOUT (could be The Onion, memes, humor, etc.)
+You must answer TWO questions:
+1. Is the DOMAIN itself a known satire/humor/parody publication?
+2. Is the CONTENT itself clearly satirical, absurdist, or fabricated for comedic effect?
 
-QUESTION: Is the SOURCE DOMAIN ({domain}) a satire publication?
+ANSWER "is_satire": true IF EITHER:
+(a) The DOMAIN is a satire/humor/parody publication (examples below), OR
+(b) The CONTENT is clearly fabricated comedy — absurd premises, impossible scenarios, obviously fake quotes, comedic exaggeration presented as "news"
 
-ANSWER "is_satire": true ONLY IF the DOMAIN itself is a satire site:
-- theonion.com, babylonbee.com, clickhole.com = satire sites
-- If domain is cnn.com, bbc.com, npr.org, substack.com, facebook.com = NOT satire sites
+KNOWN SATIRE DOMAINS (non-exhaustive):
+- US: theonion.com, babylonbee.com, clickhole.com, mcsweeneys.net, reductress.com, thehardtimes.net, duffelblog.com
+- Australia: betootaadvocate.com, theshovel.com.au, chaser.com.au
+- Canada: thebeaverton.com
+- UK: thedailymash.co.uk, newsthump.com
+- Ireland: waterfordwhispersnews.com
+- France: legorafi.fr
+- Germany: der-postillon.com
+- Spain: elmundotoday.com
+- Italy: lercio.it
+- Brazil: sensacionalista.com.br
+- India: fakingnews.firstpost.com, theunrealtimes.com
 
-ANSWER "is_satire": false IF:
-- The DOMAIN is a legitimate news/media organization (CNN, BBC, NPR, Guardian, etc.)
-- The DOMAIN is a blogging platform (Substack, Medium, WordPress)
-- The DOMAIN is social media (Facebook, Twitter, YouTube, Reddit)
-- The article is ABOUT satire but the SOURCE is not a satire publication
-- The content ANALYZES, DISCUSSES, or QUOTES satirical content
+CONTENT SIGNALS OF SATIRE (check for these in the text):
+- Absurd or impossible premises ("Man discovers he is actually a lamp")
+- Obviously fabricated quotes from real people/organizations
+- Punchlines or comedic structure in "news" format
+- Exaggerated scenarios played straight for humor
+- The publication's footer/about says "satire", "humor", "parody", "fictional"
 
-CONCRETE EXAMPLES:
-- cnn.com article about The Onion → is_satire: FALSE (CNN is the source, not The Onion)
-- bbc.com covering an Onion story → is_satire: FALSE (BBC is news, not satire)
-- substack.com analyzing The Onion → is_satire: FALSE (Substack is a platform, not satire)
-- facebook.com/TheOnion video → is_satire: FALSE (Facebook is the platform hosting it)
-- theonion.com/any-article → is_satire: TRUE (The Onion domain IS satire)
+ANSWER "is_satire": false ONLY IF:
+- The DOMAIN is a legitimate news organization AND the content is genuine reporting
+- The content is ABOUT satire but is itself serious analysis/journalism
+- The content is opinion/editorial but not comedic fabrication
 
-The domain "{domain}" - is this domain itself a satire publication?
+CRITICAL: A source from an UNKNOWN domain can still be satire if the content is clearly fabricated comedy. Judge the CONTENT, not just the domain name.
 
 Respond ONLY with JSON:
-{{"is_satire": true|false, "reason": "brief explanation focusing on the DOMAIN"}}"""
+{{"is_satire": true|false, "reason": "brief explanation"}}"""
 
     result = llm_review(client, prompt, model)
     if result and "is_satire" in result:
@@ -1386,11 +1411,13 @@ def check_auto_reject(doc: FetchedDoc) -> Tuple[bool, str, bool]:
     - needs_llm_satire_review: True if satire signals detected but needs LLM verification
     """
     domain = doc.domain.lower()
+    # Strip www. prefix for matching (tldextract should do this, but fallback may not)
+    domain_bare = domain.removeprefix("www.")
     url_lower = (doc.url or "").lower()
 
     # Known satire domains - definite reject, no LLM needed
-    if domain in KNOWN_SATIRE_DOMAINS:
-        return True, f"Known satire site: {domain}", False
+    if domain_bare in KNOWN_SATIRE_DOMAINS or domain in KNOWN_SATIRE_DOMAINS:
+        return True, f"Known satire site: {domain_bare}", False
 
     # Known satire accounts on social media platforms (e.g., facebook.com/TheOnion)
     # These are satire organizations posting on other platforms
@@ -1399,8 +1426,8 @@ def check_auto_reject(doc: FetchedDoc) -> Tuple[bool, str, bool]:
             return True, f"Known satire account on {domain}: {pattern.strip('/')}", False
 
     # Unreliable source domains (user-generated content, forums, etc.)
-    if domain in UNRELIABLE_SOURCE_DOMAINS:
-        return True, f"Unreliable source type: {domain} (user-generated/forum content)", False
+    if domain_bare in UNRELIABLE_SOURCE_DOMAINS or domain in UNRELIABLE_SOURCE_DOMAINS:
+        return True, f"Unreliable source type: {domain_bare} (user-generated/forum content)", False
 
     # Check subdomain patterns (e.g. satire.example.com)
     if domain.startswith("satire.") or domain.startswith("humor.") or domain.startswith("parody."):
@@ -1490,18 +1517,28 @@ def evaluate_source(
                 result.llm_used = True
                 result.llm_decisions.append("satire_detection")
 
-    # If no LLM available and satire signals detected, check body for self-identification
-    if not should_reject and not llm_client and needs_llm_satire_review:
-        body_lower = normalize(main.text[:3000]) if main.text else ""
+    # If no LLM available, do aggressive content-based satire detection
+    if not should_reject and not llm_client:
+        body_lower = normalize(main.text[:5000]) if main.text else ""
+        footer_lower = normalize(main.text[-2000:]) if main.text and len(main.text) > 2000 else body_lower
+
+        # Check body AND footer for self-identification as satire
         body_satire_patterns = [
             "this is a satirical", "this is satire", "satirical news",
             "all stories are fictional", "all articles are satire",
             "entertainment purposes only", "parody site", "humor publication",
+            "satirical publication", "a satirical", "is satirical",
+            "satire and parody", "humor and satire", "comedic purpose",
+            "fictional and satirical", "satirical commentary",
+            "internet tendency",  # McSweeney's Internet Tendency
+            "not intended as factual", "purely fictional",
+            "humor column", "humor piece", "satire column",
         ]
-        if any(p in body_lower for p in body_satire_patterns):
+        if any(p in body_lower for p in body_satire_patterns) or \
+           any(p in footer_lower for p in body_satire_patterns):
             should_reject = True
             reject_reason = "Heuristic: source self-identifies as satire in body text"
-        else:
+        elif needs_llm_satire_review:
             result.warnings.append("Satire keywords in metadata - manual review recommended")
 
     if should_reject:
