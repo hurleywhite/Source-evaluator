@@ -99,7 +99,6 @@ HEADERS = {
     "User-Agent": USER_AGENT,
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
     "Accept-Language": "en-US,en;q=0.9",
-    "Accept-Encoding": "gzip, deflate, br",
     "DNT": "1",
     "Connection": "keep-alive",
     "Upgrade-Insecure-Requests": "1",
@@ -107,7 +106,6 @@ HEADERS = {
     "Sec-Fetch-Mode": "navigate",
     "Sec-Fetch-Site": "none",
     "Sec-Fetch-User": "?1",
-    "Cache-Control": "max-age=0",
 }
 # Alternate headers for retry on 403 (different browser fingerprint)
 RETRY_HEADERS = {
@@ -117,7 +115,6 @@ RETRY_HEADERS = {
     ),
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
     "Accept-Language": "en-US,en;q=0.5",
-    "Accept-Encoding": "gzip, deflate, br",
     "DNT": "1",
     "Connection": "keep-alive",
     "Upgrade-Insecure-Requests": "1",
@@ -1027,7 +1024,32 @@ def extract_from_html(html: str, url: str) -> Tuple[Dict[str, str], str, str]:
     meta["published_time"] = get_prop("article:published_time") or ""
     meta["author"] = get_meta("author") or get_prop("article:author") or ""
 
-    # Remove noise
+    # ── Extract JSON-LD BEFORE removing script tags ──
+    main_text = ""
+    try:
+        for sc in soup.find_all("script", attrs={"type": re.compile("ld\\+json", re.I)}):
+            raw = (sc.string or sc.get_text() or "").strip()
+            if not raw:
+                continue
+            try:
+                data = json.loads(raw)
+                if isinstance(data, dict):
+                    body = data.get("articleBody") or data.get("text") or ""
+                    if isinstance(body, str) and len(body) > len(main_text):
+                        main_text = body
+                # Handle JSON-LD arrays (some sites use @graph)
+                elif isinstance(data, list):
+                    for item in data:
+                        if isinstance(item, dict):
+                            body = item.get("articleBody") or item.get("text") or ""
+                            if isinstance(body, str) and len(body) > len(main_text):
+                                main_text = body
+            except Exception:
+                pass
+    except Exception:
+        pass
+
+    # Remove noise (AFTER JSON-LD extraction)
     for tag in soup(["script", "style", "noscript", "svg"]):
         tag.decompose()
     for tagname in ["nav", "footer", "header", "aside", "form", "button"]:
@@ -1050,49 +1072,80 @@ def extract_from_html(html: str, url: str) -> Tuple[Dict[str, str], str, str]:
         except (AttributeError, TypeError):
             continue
 
-    # Try JSON-LD
-    main_text = ""
-    try:
-        for sc in soup.find_all("script", attrs={"type": re.compile("ld\\+json", re.I)}):
-            raw = (sc.string or sc.get_text() or "").strip()
-            if not raw:
-                continue
-            try:
-                data = json.loads(raw)
-                if isinstance(data, dict):
-                    body = data.get("articleBody") or data.get("text") or ""
-                    if isinstance(body, str) and len(body) > len(main_text):
-                        main_text = body
-            except Exception:
-                pass
-    except Exception:
-        pass
+    # Gather all candidate texts, then pick the best one
+    candidates = {}
 
-    # Try <article>
-    if not main_text or len(main_text) < 500:
-        art = soup.find("article")
-        if art:
-            art_text = art.get_text(separator="\n")
-            if len(art_text) > len(main_text):
-                main_text = art_text
+    if main_text and len(main_text) >= 200:
+        candidates["jsonld"] = main_text
+
+    # Try <article> tag
+    art = soup.find("article")
+    if art:
+        art_text = art.get_text(separator="\n")
+        if len(art_text) >= 200:
+            candidates["article"] = art_text
 
     # Try readability
-    if HAS_READABILITY and (not main_text or len(main_text) < 500):
+    if HAS_READABILITY:
         try:
-            doc = Document(html)
+            clean_html = re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f]', '', html)
+            doc = Document(clean_html)
             summary = doc.summary(html_partial=True)
             s2 = BeautifulSoup(summary, "html.parser")
             readable = s2.get_text(separator="\n")
-            if len(readable) > len(main_text):
-                main_text = readable
+            if len(readable) >= 200:
+                candidates["readability"] = readable
         except Exception:
             pass
 
-    # Fallback to full body
-    if not main_text or len(main_text) < 200:
-        main_text = soup.get_text(separator="\n")
+    # Fallback to full body text (noisiest)
+    fallback = soup.get_text(separator="\n")
+    if len(fallback) >= 200:
+        candidates["fallback"] = fallback
 
-    return meta, title, clean_text(main_text)
+    # Pick the best candidate using a quality-first strategy:
+    # - JSON-LD articleBody is the cleanest (author-written content only)
+    # - <article> tag is usually clean if present and not too large
+    # - Readability is good when it returns a focused article (<15K chars)
+    # - When all sources are huge, take the shortest that has >= 500 chars
+    # - Fallback (full page text) is last resort
+    best = ""
+    if "jsonld" in candidates and len(candidates["jsonld"]) >= 500:
+        best = candidates["jsonld"]
+    else:
+        # Score candidates by quality: shorter is usually cleaner (less noise)
+        # but must be >= 500 chars to be meaningful article content
+        scored = []
+        for source, text in candidates.items():
+            if source == "fallback":
+                continue  # fallback is last resort
+            tlen = len(text)
+            if tlen < 500:
+                continue
+            # Prefer sources in the 500-15000 char sweet spot (typical article)
+            # Penalize very large extractions (likely grabbed navigation/ads)
+            if tlen <= 15000:
+                score = 1000  # ideal range
+            elif tlen <= 30000:
+                score = 500   # acceptable
+            else:
+                score = 100   # probably too noisy
+            # Bonus for JSON-LD and article tag (structurally cleaner)
+            if source == "jsonld":
+                score += 500
+            elif source == "article":
+                score += 200
+            scored.append((score, source, text))
+
+        if scored:
+            scored.sort(reverse=True)
+            best = scored[0][2]
+
+    # Final fallback
+    if not best or len(best) < 200:
+        best = fallback if fallback else ""
+
+    return meta, title, clean_text(best)
 
 
 def sanitize_url(url: str) -> str:
