@@ -10,3 +10,4 @@ uvicorn
 jinja2
 python-multipart
 python-dotenv
+pdfminer.six

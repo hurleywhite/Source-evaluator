@@ -90,11 +90,37 @@ except Exception:
 DEFAULT_TIMEOUT_S = 25
 DEFAULT_SLEEP_S = 0.8
 
-USER_AGENT = "HRFSourceEvaluator/6.0 (+research)"
+# Realistic browser User-Agent to avoid bot-blocking (403s)
+USER_AGENT = (
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
+)
 HEADERS = {
     "User-Agent": USER_AGENT,
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+    "Accept-Language": "en-US,en;q=0.9",
+    "Accept-Encoding": "gzip, deflate, br",
+    "DNT": "1",
+    "Connection": "keep-alive",
+    "Upgrade-Insecure-Requests": "1",
+    "Sec-Fetch-Dest": "document",
+    "Sec-Fetch-Mode": "navigate",
+    "Sec-Fetch-Site": "none",
+    "Sec-Fetch-User": "?1",
+    "Cache-Control": "max-age=0",
+}
+# Alternate headers for retry on 403 (different browser fingerprint)
+RETRY_HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:124.0) "
+        "Gecko/20100101 Firefox/124.0"
+    ),
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-    "Accept-Language": "en-US,en;q=0.8",
+    "Accept-Language": "en-US,en;q=0.5",
+    "Accept-Encoding": "gzip, deflate, br",
+    "DNT": "1",
+    "Connection": "keep-alive",
+    "Upgrade-Insecure-Requests": "1",
 }
 
 # Paths to crawl for publisher signals
@@ -1069,6 +1095,88 @@ def extract_from_html(html: str, url: str) -> Tuple[Dict[str, str], str, str]:
     return meta, title, clean_text(main_text)
 
 
+def sanitize_url(url: str) -> str:
+    """Fix malformed URLs before fetching.
+
+    Handles common issues like double protocols (https://http://...) and
+    missing schemes.
+    """
+    # Fix double protocol: https://http:// or http://https://
+    double_proto = re.match(r'^https?://(https?://.*)', url, re.I)
+    if double_proto:
+        url = double_proto.group(1)
+    # Ensure scheme
+    if not url.startswith(("http://", "https://")):
+        url = "https://" + url
+    return url
+
+
+# Domains known to require extended timeouts
+SLOW_DOMAINS = {
+    "washingtonpost.com", "nytimes.com", "economist.com",
+    "bloomberg.com", "wsj.com", "ft.com",
+}
+
+# Known paywall domains — classify specifically rather than generic failure
+KNOWN_PAYWALL_DOMAINS = {
+    "wsj.com", "ft.com", "economist.com", "nytimes.com",
+    "washingtonpost.com", "bloomberg.com", "theaustralian.com.au",
+    "thetimes.co.uk", "telegraph.co.uk",
+}
+
+
+def _process_response(doc: FetchedDoc, resp: requests.Response, url: str, cache_dir: str) -> None:
+    """Process an HTTP response and populate the FetchedDoc."""
+    doc.status_code = resp.status_code
+    doc.final_url = str(resp.url)
+    doc.content_type = resp.headers.get("content-type", "")
+    doc.bytes_downloaded = len(resp.content or b"")
+
+    if resp.status_code >= 400:
+        doc.fetch_status = "http_error"
+        # Distinguish paywall from generic HTTP errors
+        domain = registrable_domain(url)
+        if resp.status_code in (401, 403) and domain in KNOWN_PAYWALL_DOMAINS:
+            doc.warnings.append(f"HTTP {resp.status_code} — paywall/subscription required ({domain})")
+        elif resp.status_code == 403:
+            doc.warnings.append(f"HTTP {resp.status_code} — access blocked (bot detection or geo-restriction)")
+        elif resp.status_code == 404:
+            doc.warnings.append(f"HTTP {resp.status_code} — page not found (link may be broken)")
+        else:
+            doc.warnings.append(f"HTTP {resp.status_code}")
+    elif "pdf" in doc.content_type.lower() or doc.final_url.lower().endswith(".pdf"):
+        doc.fetch_status = "pdf"
+        if HAS_PDFMINER:
+            try:
+                ensure_dir(cache_dir)
+                pdf_path = os.path.join(cache_dir, f"{sha256_hex(url)}.pdf")
+                with open(pdf_path, "wb") as f:
+                    f.write(resp.content)
+                doc.text = clean_text(pdf_extract_text(pdf_path) or "")
+            except Exception as e:
+                doc.warnings.append(f"PDF extraction failed: {e}")
+        else:
+            doc.warnings.append("PDF extraction unavailable (pdfminer not installed)")
+    else:
+        resp.encoding = resp.encoding or "utf-8"
+        html = resp.text or ""
+        doc.html = html
+        meta, title, text = extract_from_html(html, doc.final_url or url)
+        doc.meta = meta
+        doc.title = title
+        doc.author = meta.get("author", "")
+        doc.published = meta.get("published_time", "")
+        doc.text = text
+        doc.fetch_status = "ok"
+
+        # Check for paywall/botblock
+        combined = normalize(html + " " + text)
+        if any(normalize(h) in combined for h in BOTBLOCK_HINTS):
+            doc.warnings.append("Bot-block/anti-automation detected")
+        if any(normalize(h) in combined for h in PAYWALL_HINTS):
+            doc.warnings.append("Paywall/login wall detected")
+
+
 def fetch_doc(
     session: requests.Session,
     url: str,
@@ -1078,7 +1186,12 @@ def fetch_doc(
     cache_max_age_s: int,
     no_cache: bool,
 ) -> FetchedDoc:
-    """Fetch a document."""
+    """Fetch a document with automatic URL sanitization, retry on 403, and
+    extended timeouts for known slow domains."""
+
+    # Sanitize URL before anything else
+    url = sanitize_url(url)
+
     if not no_cache:
         cached = read_cache(cache_dir, url, cache_max_age_s)
         if cached:
@@ -1087,51 +1200,33 @@ def fetch_doc(
     doc = FetchedDoc(url=url, fetched_at=utc_now_iso())
     doc.domain = registrable_domain(url)
 
+    # Extend timeout for known slow / heavy sites
+    effective_timeout = timeout_s
+    if doc.domain in SLOW_DOMAINS:
+        effective_timeout = max(timeout_s, 45)
+
     try:
-        resp = session.get(url, headers=HEADERS, timeout=timeout_s, allow_redirects=True)
-        doc.status_code = resp.status_code
-        doc.final_url = str(resp.url)
-        doc.content_type = resp.headers.get("content-type", "")
-        doc.bytes_downloaded = len(resp.content or b"")
+        resp = session.get(
+            url, headers=HEADERS, timeout=effective_timeout,
+            allow_redirects=True,
+        )
 
-        if resp.status_code >= 400:
-            doc.fetch_status = "http_error"
-            doc.warnings.append(f"HTTP {resp.status_code}")
-        elif "pdf" in doc.content_type.lower() or doc.final_url.lower().endswith(".pdf"):
-            doc.fetch_status = "pdf"
-            if HAS_PDFMINER:
-                try:
-                    ensure_dir(cache_dir)
-                    pdf_path = os.path.join(cache_dir, f"{sha256_hex(url)}.pdf")
-                    with open(pdf_path, "wb") as f:
-                        f.write(resp.content)
-                    doc.text = clean_text(pdf_extract_text(pdf_path) or "")
-                except Exception as e:
-                    doc.warnings.append(f"PDF extraction failed: {e}")
-            else:
-                doc.warnings.append("PDF extraction unavailable (pdfminer not installed)")
-        else:
-            resp.encoding = resp.encoding or "utf-8"
-            html = resp.text or ""
-            doc.html = html
-            meta, title, text = extract_from_html(html, doc.final_url or url)
-            doc.meta = meta
-            doc.title = title
-            doc.author = meta.get("author", "")
-            doc.published = meta.get("published_time", "")
-            doc.text = text
-            doc.fetch_status = "ok"
+        # Retry on 403 with alternate headers (different browser fingerprint)
+        if resp.status_code == 403:
+            time.sleep(1)  # Brief pause before retry
+            resp = session.get(
+                url, headers=RETRY_HEADERS, timeout=effective_timeout,
+                allow_redirects=True,
+            )
 
-            # Check for paywall/botblock
-            combined = normalize(html + " " + text)
-            if any(normalize(h) in combined for h in BOTBLOCK_HINTS):
-                doc.warnings.append("Bot-block/anti-automation detected")
-            if any(normalize(h) in combined for h in PAYWALL_HINTS):
-                doc.warnings.append("Paywall/login wall detected")
+        _process_response(doc, resp, url, cache_dir)
 
+    except requests.exceptions.TooManyRedirects:
+        doc.fetch_status = "error"
+        doc.warnings.append("Redirect loop detected (too many redirects)")
     except requests.Timeout:
         doc.fetch_status = "timeout"
-        doc.warnings.append("Request timed out")
+        doc.warnings.append(f"Request timed out ({effective_timeout}s)")
     except Exception as e:
         doc.fetch_status = "error"
         doc.warnings.append(f"Fetch error: {e}")
@@ -1213,7 +1308,9 @@ def assess_completeness(doc: FetchedDoc) -> Tuple[Completeness, str]:
     we cleaned out).
     """
     if doc.fetch_status in ("http_error", "timeout", "error"):
-        return Completeness.FAILED, f"Fetch failed: {doc.fetch_status}"
+        # Include warning details in reason for more specific downstream messaging
+        warning_detail = "; ".join(doc.warnings) if doc.warnings else doc.fetch_status
+        return Completeness.FAILED, f"Fetch failed: {warning_detail}"
 
     text_len = len(doc.text or "")
 
@@ -1473,7 +1570,20 @@ def determine_use_permission(
 
     # Rule: Access failure caps A (factual) use
     if core.completeness == Completeness.FAILED:
-        return UsePermission.MANUAL_RETRIEVAL, "Fetch failed - manual retrieval needed before assessment"
+        # Give a more specific reason based on completeness_reason
+        reason_detail = core.completeness_reason or "unknown fetch failure"
+        if "404" in reason_detail or "not found" in reason_detail.lower():
+            return UsePermission.MANUAL_RETRIEVAL, f"Page not found (404) — link may be broken or moved"
+        elif "paywall" in reason_detail.lower() or "subscription" in reason_detail.lower():
+            return UsePermission.MANUAL_RETRIEVAL, f"Paywall/subscription required — manual retrieval needed"
+        elif "403" in reason_detail or "blocked" in reason_detail.lower():
+            return UsePermission.MANUAL_RETRIEVAL, f"Access blocked (bot detection) — try manual retrieval"
+        elif "timeout" in reason_detail.lower():
+            return UsePermission.MANUAL_RETRIEVAL, f"Request timed out — site may be slow or unavailable"
+        elif "redirect" in reason_detail.lower():
+            return UsePermission.MANUAL_RETRIEVAL, f"Redirect loop detected — URL may be outdated"
+        else:
+            return UsePermission.MANUAL_RETRIEVAL, f"Fetch failed — manual retrieval needed ({reason_detail})"
 
     if core.completeness == Completeness.PARTIAL:
         if intended_use == IntendedUse.A:
@@ -1925,6 +2035,8 @@ def evaluate_sources(
 ) -> List[EvalResult]:
     """Evaluate multiple sources."""
     session = requests.Session()
+    session.headers.update(HEADERS)
+    session.max_redirects = 10  # Prevent infinite redirect loops
 
     # Initialize LLM client if enabled
     llm_client = None
@@ -1935,10 +2047,11 @@ def evaluate_sources(
         else:
             print("LLM augmentation requested but ANTHROPIC_API_KEY not set or anthropic not installed")
 
-    # Dedupe URLs
+    # Sanitize and dedupe URLs
     seen = set()
     unique_urls = []
     for u in urls:
+        u = sanitize_url(u)
         if u not in seen:
             seen.add(u)
             unique_urls.append(u)
