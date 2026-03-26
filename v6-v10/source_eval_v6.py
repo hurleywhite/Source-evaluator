@@ -341,6 +341,17 @@ class PublisherSignals:
 
 
 @dataclass
+class ContentAnalysis:
+    """Content-level claim analysis results from deep LLM review."""
+    claims: List[Dict[str, Any]] = field(default_factory=list)
+    contradiction_flags: List[str] = field(default_factory=list)
+    confidence_summary: str = ""
+    confidence_level: str = "not_assessed"  # high, medium, low, not_assessed
+    analysis_truncated: bool = False
+    analyzed: bool = False
+
+
+@dataclass
 class CoreChecks:
     """Core checks (Part 1 of HRF rubric) - always required."""
     # 1) Intended use
@@ -376,6 +387,10 @@ class CoreChecks:
     severity_reason: str = ""
     severity_missing: List[str] = field(default_factory=list)
 
+    # 8) Content analysis signals (from deep claim review)
+    content_analysis_boost: Optional[str] = None  # "upgrade", "downgrade", or None
+    content_analysis_reason: str = ""
+
 
 @dataclass
 class EvalResult:
@@ -393,6 +408,9 @@ class EvalResult:
 
     # Publisher signals
     publisher: PublisherSignals = field(default_factory=PublisherSignals)
+
+    # Content analysis (deep claim review)
+    content_analysis: ContentAnalysis = field(default_factory=ContentAnalysis)
 
     # Metadata
     fetch_status: str = ""
@@ -510,7 +528,9 @@ def find_quotes(text: str, keywords: List[str], max_quotes: int = 2, context_cha
 # LLM Augmentation
 # -----------------------------------------------------------------------------
 DEFAULT_LLM_MODEL = "claude-3-haiku-20240307"
-LLM_MAX_TEXT_CHARS = 4000  # Truncate text sent to LLM
+CONTENT_ANALYSIS_MODEL = "claude-sonnet-4-20250514"
+LLM_MAX_TEXT_CHARS = 4000  # Truncate text sent to LLM for quick checks
+CONTENT_ANALYSIS_MAX_CHARS = 12000  # Longer context for deep content analysis
 
 
 def get_anthropic_client() -> Optional[Any]:
@@ -808,6 +828,113 @@ Respond ONLY with JSON:
     if result and "permission" in result:
         return result["permission"], result.get("reason", "LLM assessment")
     return None
+
+
+def llm_content_analysis(
+    client: Any,
+    text: str,
+    title: str,
+    url: str,
+    model: str = CONTENT_ANALYSIS_MODEL,
+) -> Optional[ContentAnalysis]:
+    """
+    Deep content analysis using Claude Sonnet.
+    Extracts claims, checks plausibility, flags contradictions.
+    Returns a ContentAnalysis dataclass or None on error.
+    """
+    if not client or not text:
+        return None
+
+    truncated = text[:CONTENT_ANALYSIS_MAX_CHARS]
+    was_truncated = len(text) > CONTENT_ANALYSIS_MAX_CHARS
+
+    prompt = f"""You are a research credibility analyst. Read this article carefully and
+evaluate the factual claims it makes. Your job is NOT to judge the source —
+it is to judge whether the CONTENT is well-sourced, internally consistent,
+and factually accurate based on your knowledge.
+
+ARTICLE TITLE: {title}
+URL: {url}
+
+FULL TEXT:
+{truncated}
+
+Perform these analyses:
+
+1. CLAIM EXTRACTION: Identify the 3-5 most significant FACTUAL claims
+   (not opinions, not quotes from others, not background context).
+   For each claim:
+   - Quote or closely paraphrase the claim
+   - Does it cite a specific source (named person, document, dataset, organization)?
+   - How specific is it? (dates, names, quantities, locations vs vague assertions)
+
+2. PLAUSIBILITY & RED FLAGS: For each claim, assess:
+   - Is it internally consistent with the rest of the article?
+   - Red flags: extraordinary claims without evidence, suspiciously round numbers,
+     all-anonymous sourcing on high-stakes claims, logical leaps,
+     emotionally manipulative framing disguised as reporting,
+     mixing factual claims with unsubstantiated speculation
+
+3. FACTUAL ACCURACY: Flag any claims that you are CONFIDENT contradict
+   well-established, widely-known facts. Examples:
+   - Wrong dates for well-known historical events
+   - Misattributed quotes from public figures
+   - Incorrect geographic or political facts (wrong capital, wrong leader)
+   - Statistics that contradict authoritative data (UN, WHO, World Bank)
+   IMPORTANT: Only flag contradictions you are genuinely confident about.
+   Do NOT flag claims just because you cannot verify them.
+
+4. OVERALL CONFIDENCE: How well-sourced and reliable are this article's claims overall?
+   - "high": Most claims are attributed, specific, and consistent
+   - "medium": Some claims are well-sourced but others lack attribution or specificity
+   - "low": Most claims are unattributed, vague, or contain red flags/contradictions
+
+Respond ONLY with JSON:
+{{
+  "claims": [
+    {{
+      "text": "the verbatim or paraphrased claim",
+      "has_attribution": true or false,
+      "attribution_detail": "who/what is cited, or 'none'",
+      "specificity": "high" or "medium" or "low",
+      "plausibility": "solid" or "plausible" or "questionable" or "implausible",
+      "red_flags": ["list of specific concerns, empty if none"]
+    }}
+  ],
+  "contradictions": ["list of specific factual errors found, empty if none"],
+  "confidence_level": "high" or "medium" or "low",
+  "confidence_summary": "2-3 sentence explanation of overall claim quality and sourcing"
+}}"""
+
+    try:
+        response = client.messages.create(
+            model=model,
+            max_tokens=1500,
+            messages=[{"role": "user", "content": prompt}],
+        )
+        resp_text = response.content[0].text.strip()
+
+        # Extract JSON from response
+        if "```json" in resp_text:
+            resp_text = resp_text.split("```json")[1].split("```")[0].strip()
+        elif "```" in resp_text:
+            resp_text = resp_text.split("```")[1].split("```")[0].strip()
+
+        data = json.loads(resp_text)
+
+        result = ContentAnalysis(
+            claims=data.get("claims", []),
+            contradiction_flags=data.get("contradictions", []),
+            confidence_level=data.get("confidence_level", "not_assessed"),
+            confidence_summary=data.get("confidence_summary", ""),
+            analysis_truncated=was_truncated,
+            analyzed=True,
+        )
+        return result
+
+    except Exception as e:
+        logging.debug(f"Content analysis error: {e}")
+        return None
 
 
 # -----------------------------------------------------------------------------
@@ -1361,6 +1488,19 @@ def determine_use_permission(
 
     # For A (factual) use
     if intended_use == IntendedUse.A:
+        # Content analysis: multiple contradictions = Do not use
+        if core.content_analysis_boost == "downgrade" and core.content_analysis_reason:
+            if "contradiction" in core.content_analysis_reason.lower():
+                # Count contradictions from the reason string
+                import re as _re
+                m = _re.search(r"(\d+) factual contradiction", core.content_analysis_reason)
+                if m and int(m.group(1)) >= 3:
+                    return UsePermission.DO_NOT_USE, f"Content contains multiple factual errors: {core.content_analysis_reason}"
+
+        # Content analysis: implausible claims
+        if core.content_analysis_boost == "downgrade" and "implausible" in (core.content_analysis_reason or ""):
+            return UsePermission.C_CONTEXT, f"Content analysis flagged concerns: {core.content_analysis_reason}"
+
         # Check evidence strength
         if core.evidence_strength == EvidenceStrength.WEAK:
             return UsePermission.C_CONTEXT, "Evidence too weak for factual support - use as context only"
@@ -1377,6 +1517,9 @@ def determine_use_permission(
         # Determine A level
         if core.evidence_strength == EvidenceStrength.STRONG:
             if core.completeness == Completeness.COMPLETE and core.has_specificity:
+                # Content analysis downgrade: strong evidence but content has issues
+                if core.content_analysis_boost == "downgrade":
+                    return UsePermission.A_SAFEGUARDS, f"Strong evidence but content analysis flagged concerns: {core.content_analysis_reason}"
                 # Check corroboration for high-impact claims
                 if is_single_source:
                     return UsePermission.A_SAFEGUARDS, "Strong evidence but single-source run - corroboration not assessed"
@@ -1384,7 +1527,13 @@ def determine_use_permission(
 
         # Medium evidence
         if core.evidence_strength == EvidenceStrength.MEDIUM:
+            if core.content_analysis_boost == "downgrade":
+                return UsePermission.C_CONTEXT, f"Medium evidence downgraded: {core.content_analysis_reason}"
             return UsePermission.A_SAFEGUARDS, "Secondary reporting - must corroborate for key claims"
+
+        # Content analysis upgrade: weak heuristics but strong content
+        if core.content_analysis_boost == "upgrade":
+            return UsePermission.A_SAFEGUARDS, f"Upgraded by content analysis: {core.content_analysis_reason}"
 
         return UsePermission.C_CONTEXT, "Insufficient evidence strength for factual support"
 
@@ -1677,6 +1826,65 @@ def evaluate_source(
                 result.llm_used = True
                 result.llm_decisions.append("severity_support")
 
+    # Deep content analysis: extract claims, check plausibility, flag contradictions
+    if llm_client and main.text and len(main.text) > 500 and core.completeness != Completeness.FAILED:
+        content_result = llm_content_analysis(
+            llm_client, main.text, main.title or "", main.final_url or url
+        )
+        if content_result and content_result.analyzed:
+            result.content_analysis = content_result
+            result.llm_used = True
+            result.llm_decisions.append("content_analysis")
+
+            # Apply content analysis signals to core checks
+            # 1) Low confidence = downgrade evidence
+            if content_result.confidence_level == "low":
+                if core.evidence_strength in (EvidenceStrength.STRONG, EvidenceStrength.MEDIUM):
+                    core.content_analysis_boost = "downgrade"
+                    core.content_analysis_reason = f"Content analysis: {content_result.confidence_summary}"
+
+            # 2) Contradictions with established facts
+            if content_result.contradiction_flags:
+                num_contradictions = len(content_result.contradiction_flags)
+                core.content_analysis_boost = "downgrade"
+                core.content_analysis_reason = (
+                    f"{num_contradictions} factual contradiction(s): "
+                    + "; ".join(content_result.contradiction_flags[:3])
+                )
+                result.warnings.append(
+                    f"Content analysis flagged {num_contradictions} factual contradiction(s)"
+                )
+
+            # 3) No claims have attribution
+            if content_result.claims:
+                attributed = sum(1 for c in content_result.claims if c.get("has_attribution"))
+                total = len(content_result.claims)
+                if attributed == 0 and total >= 2:
+                    core.content_analysis_boost = "downgrade"
+                    core.content_analysis_reason = (
+                        f"None of {total} extracted claims have source attribution"
+                    )
+
+                # 4) Any claims rated "implausible"
+                implausible = [c for c in content_result.claims if c.get("plausibility") == "implausible"]
+                if implausible:
+                    core.content_analysis_boost = "downgrade"
+                    core.content_analysis_reason = (
+                        f"{len(implausible)} claim(s) rated implausible: "
+                        + implausible[0].get("text", "")[:100]
+                    )
+                    result.warnings.append(f"{len(implausible)} claim(s) rated implausible by content analysis")
+
+            # 5) High confidence with good attribution = potential upgrade
+            if (content_result.confidence_level == "high"
+                and attributed >= total * 0.6
+                and not content_result.contradiction_flags
+                and core.content_analysis_boost != "downgrade"):
+                core.content_analysis_boost = "upgrade"
+                core.content_analysis_reason = (
+                    f"Content analysis: high confidence, {attributed}/{total} claims attributed"
+                )
+
     # Determine final use permission
     use_perm, perm_reason = determine_use_permission(intended_use, core, result.publisher, is_single_source, main.domain)
 
@@ -1684,6 +1892,8 @@ def evaluate_source(
     # Skip upgrade review for Wikipedia (tertiary source - always context-only)
     if llm_client and main.text and use_perm == UsePermission.C_CONTEXT and "wikipedia.org" not in main.domain.lower():
         checks_summary = f"evidence={core.evidence_strength.value}, specificity={core.has_specificity}, relationship={core.relationship.value}"
+        if result.content_analysis.analyzed:
+            checks_summary += f", content_confidence={result.content_analysis.confidence_level}"
         llm_final = llm_final_review(
             llm_client, main.text, use_perm.value, checks_summary, llm_model
         )
@@ -1896,6 +2106,14 @@ def result_to_dict(r: EvalResult) -> Dict[str, Any]:
                 "quotes": r.publisher.standards_transparency.evidence_quotes,
             },
         },
+        "content_analysis": {
+            "analyzed": r.content_analysis.analyzed,
+            "confidence_level": r.content_analysis.confidence_level,
+            "confidence_summary": r.content_analysis.confidence_summary,
+            "claims": r.content_analysis.claims,
+            "contradiction_flags": r.content_analysis.contradiction_flags,
+            "analysis_truncated": r.content_analysis.analysis_truncated,
+        } if r.content_analysis.analyzed else {"analyzed": False},
         "metadata": {
             "fetch_status": r.fetch_status,
             "content_type": r.content_type,
