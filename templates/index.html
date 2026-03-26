@@ -659,60 +659,72 @@ async function startEvaluation() {
     showError('No valid URLs to evaluate. Enter at least one URL starting with http.');
     return;
   }
+  if (urls.length > 200) {
+    showError('Maximum 200 URLs per run.');
+    return;
+  }
 
   hideError();
   document.getElementById('resultsPanel').style.display = 'none';
   document.getElementById('progressPanel').style.display = 'block';
   document.getElementById('btnEvaluate').disabled = true;
+
+  const BATCH_SIZE = 10;
+  const batches = [];
+  for (let i = 0; i < urls.length; i += BATCH_SIZE) {
+    batches.push(urls.slice(i, i + BATCH_SIZE));
+  }
+
+  const totalBatches = batches.length;
+  let completedBatches = 0;
+  let allResults = [];
+  let warnings = [];
+
   document.getElementById('progressText').textContent =
-    `Evaluating ${urls.length} source${urls.length !== 1 ? 's' : ''}... this may take a minute or two`;
+    `Evaluating ${urls.length} source${urls.length !== 1 ? 's' : ''} (batch 1 of ${totalBatches})...`;
   document.getElementById('progressBar').style.width = '5%';
 
-  // Animate progress bar while waiting (fake progress for UX)
-  let fakePct = 5;
-  progressInterval = setInterval(() => {
-    if (fakePct < 85) {
-      fakePct += Math.random() * 3;
-      document.getElementById('progressBar').style.width = Math.min(fakePct, 85) + '%';
-    }
-  }, 2000);
-
   try {
-    const formData = new FormData();
-    formData.append('urls', urls.join('\n'));
-    formData.append('intended_use', document.getElementById('intendedUse').value);
-    formData.append('use_llm', document.getElementById('useLlm').checked);
+    const intendedUse = document.getElementById('intendedUse').value;
+    const useLlm = document.getElementById('useLlm').checked;
 
-    // Synchronous call — waits for evaluation to complete
-    const resp = await fetch('/api/evaluate', { method: 'POST', body: formData });
-    const data = await resp.json();
+    for (let b = 0; b < batches.length; b++) {
+      document.getElementById('progressText').textContent =
+        `Evaluating batch ${b + 1} of ${totalBatches} (${allResults.length} of ${urls.length} done)...`;
 
-    clearInterval(progressInterval);
-    progressInterval = null;
+      const formData = new FormData();
+      formData.append('urls', batches[b].join('\n'));
+      formData.append('intended_use', intendedUse);
+      formData.append('use_llm', useLlm);
 
-    if (data.error && (!data.results || data.results.length === 0)) {
-      showError('Evaluation failed: ' + data.error);
-      resetUI();
-      return;
+      const resp = await fetch('/api/evaluate', { method: 'POST', body: formData });
+      const data = await resp.json();
+
+      if (data.results && data.results.length > 0) {
+        allResults = allResults.concat(data.results);
+      }
+      if (data.error) {
+        warnings.push(`Batch ${b + 1}: ${data.error}`);
+      }
+
+      completedBatches++;
+      const pct = Math.round((completedBatches / totalBatches) * 100);
+      document.getElementById('progressBar').style.width = pct + '%';
     }
 
-    if (data.status === 'done' || (data.results && data.results.length > 0)) {
-      document.getElementById('progressBar').style.width = '100%';
-      currentResults = data.results;
-      renderResults(data.results);
+    if (allResults.length > 0) {
+      currentResults = allResults;
+      renderResults(allResults);
       document.getElementById('progressPanel').style.display = 'none';
       document.getElementById('btnEvaluate').disabled = false;
-
-      // Show warning if there was a partial error
-      if (data.error) {
-        showError('Warning: ' + data.error);
+      if (warnings.length > 0) {
+        showError('Warning: ' + warnings.join('; '));
       }
     } else {
-      showError('Evaluation failed: ' + (data.error || 'No results returned'));
+      showError('Evaluation failed: ' + (warnings.join('; ') || 'No results returned'));
       resetUI();
     }
   } catch (err) {
-    if (progressInterval) { clearInterval(progressInterval); progressInterval = null; }
     showError('Failed to evaluate: ' + err.message);
     resetUI();
   }

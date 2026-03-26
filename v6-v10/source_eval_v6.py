@@ -111,15 +111,75 @@ POLICY_KEYWORDS = [
     "methodology", "governance", "ownership", "funding", "transparency",
 ]
 
-# Auto-reject domains
-KNOWN_SATIRE_DOMAINS = {"theonion.com", "babylonbee.com", "clickhole.com"}
-SATIRE_KEYWORDS = ["satire", "parody", "humor", "humour", "comedy site"]
+# Auto-reject domains — international satire/comedy publications
+KNOWN_SATIRE_DOMAINS = {
+    # English-language
+    "theonion.com", "babylonbee.com", "clickhole.com",
+    "thebeaverton.com",          # Canada
+    "thedailymash.co.uk",        # UK
+    "newsthump.com",             # UK
+    "waterfordwhispersnews.com", # Ireland
+    "betootaadvocate.com",       # Australia
+    "theshovel.com.au",          # Australia
+    "thecivilian.co.nz",         # New Zealand
+    "borowitz.com",              # US (Borowitz Report)
+    "thehardtimes.net",          # US punk/music satire
+    "reductress.com",            # US
+    "pointandclickbait.com",     # Gaming satire
+    "duffelblog.com",            # US military satire
+    # French
+    "legorafi.fr",               # France
+    # German
+    "der-postillon.com",         # Germany
+    "postillon.com",             # Germany (alt)
+    # Spanish
+    "elmundotoday.com",          # Spain
+    "elpejotero.com",            # Latin America
+    "actualidadpanamericana.com",# Colombia
+    # Italian
+    "lercio.it",                 # Italy
+    # Portuguese / Brazilian
+    "sensacionalista.com.br",    # Brazil
+    # Nordic
+    "ransen.net",                # Sweden
+    # Russian
+    "panorama.pub",              # Russia
+    # Indian
+    "fakingnews.firstpost.com",  # India
+    "theunrealtimes.com",        # India
+    # Middle East
+    "alhudood.net",              # Arabic satire
+    # Chinese-language
+    "babylonbee.cn",             # Chinese satire mirror
+    # Japanese
+    "kyoko-np.net",              # Japan (fake news satire)
+    # Korean
+    "notrealnews.kr",            # Korea
+    # African
+    "nduna.co.za",               # South Africa
+    "themaizereport.com",        # Nigeria
+}
+SATIRE_KEYWORDS = [
+    "satire", "parody", "humor", "humour", "comedy site",
+    "satirical", "fake news comedy", "not real news", "comedic",
+]
 
 # Known satire accounts on social media platforms (case-insensitive patterns in URL path)
 KNOWN_SATIRE_ACCOUNTS = [
     "/theonion/", "/theonion", "/@theonion",
     "/babylonbee/", "/babylonbee", "/@babylonbee",
     "/clickhole/", "/clickhole", "/@clickhole",
+    "/thebeaverton/", "/@thebeaverton",
+    "/thedailymash/", "/@thedailymash",
+    "/newsthump/", "/@newsthump",
+    "/betootaadvocate/", "/@betootaadvocate",
+    "/reductress/", "/@reductress",
+    "/daborowitz/", "/@daborowitz",
+    "/legorafi/", "/@legorafi",
+    "/derpostillon/", "/@derpostillon",
+    "/elmundotoday/", "/@elmundotoday",
+    "/laboratoriodelsarcasmo/",
+    "/sensaborista/", "/@sensacionalista",
 ]
 
 # Domains not suitable for evidentiary use (user-generated content, forums, spam)
@@ -1342,6 +1402,27 @@ def check_auto_reject(doc: FetchedDoc) -> Tuple[bool, str, bool]:
     if domain in UNRELIABLE_SOURCE_DOMAINS:
         return True, f"Unreliable source type: {domain} (user-generated/forum content)", False
 
+    # Check subdomain patterns (e.g. satire.example.com)
+    if domain.startswith("satire.") or domain.startswith("humor.") or domain.startswith("parody."):
+        return True, f"Satire subdomain: {domain}", False
+
+    # Strong heuristic: site self-identifies as satire in meta description or og tags
+    # This is different from an article ABOUT satire — these are the site's own labels
+    meta_desc = normalize(doc.meta.get("description", "") or "")
+    meta_og = normalize(doc.meta.get("og:description", "") or "")
+    meta_site = normalize(doc.meta.get("og:site_name", "") or "")
+    site_labels = meta_desc + " " + meta_og + " " + meta_site
+
+    # If the SITE (not an article) calls itself satire/parody, auto-reject
+    self_identify_patterns = [
+        "satire site", "satirical news", "satirical website", "satire publication",
+        "parody news", "parody site", "fake news site", "comedy news",
+        "humor site", "humour site", "satirical publication", "not real news",
+        "all stories are fiction", "fictional news", "entertainment purposes only",
+    ]
+    if any(p in site_labels for p in self_identify_patterns):
+        return True, f"Site self-identifies as satire in metadata", False
+
     # Satire signals in metadata - FLAG for LLM review, don't auto-reject
     # This catches articles ABOUT satire which are NOT satire themselves
     needs_llm_review = False
@@ -1409,9 +1490,19 @@ def evaluate_source(
                 result.llm_used = True
                 result.llm_decisions.append("satire_detection")
 
-    # If no LLM available and satire signals detected, add warning but don't reject
+    # If no LLM available and satire signals detected, check body for self-identification
     if not should_reject and not llm_client and needs_llm_satire_review:
-        result.warnings.append("Satire keywords in metadata - manual review recommended")
+        body_lower = normalize(main.text[:3000]) if main.text else ""
+        body_satire_patterns = [
+            "this is a satirical", "this is satire", "satirical news",
+            "all stories are fictional", "all articles are satire",
+            "entertainment purposes only", "parody site", "humor publication",
+        ]
+        if any(p in body_lower for p in body_satire_patterns):
+            should_reject = True
+            reject_reason = "Heuristic: source self-identifies as satire in body text"
+        else:
+            result.warnings.append("Satire keywords in metadata - manual review recommended")
 
     if should_reject:
         result.use_permission = UsePermission.DO_NOT_USE
