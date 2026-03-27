@@ -447,6 +447,11 @@ async function runPipeline() {
       return;
     }
 
+    // Check if pipeline ran but produced no clusters (likely API credit issue)
+    if ((!data.topics || Object.keys(data.topics).length === 0) && data.sources_fetched > 0) {
+      showError('Sources were fetched successfully but no narrative clusters were generated. This usually means the Anthropic API key has insufficient credits. Please add credits at console.anthropic.com.');
+    }
+
     currentData = data;
     renderNarrativeMap(data);
 

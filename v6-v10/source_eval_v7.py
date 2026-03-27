@@ -400,7 +400,11 @@ JSON array:"""
             return claims if isinstance(claims, list) else []
         return []
     except Exception as e:
+        err_str = str(e)
         log.warning(f"  Claim extraction failed for {article.domain}: {e}")
+        # Propagate credit/auth errors so the pipeline can report them
+        if "credit balance" in err_str.lower() or "authentication" in err_str.lower():
+            raise RuntimeError(f"Anthropic API error: {err_str}")
         return []
 
 
@@ -803,7 +807,26 @@ def run_narrative_pipeline(
         return nm
 
     # Step 3: Extract claims
-    all_claims = extract_all_claims(client, articles)
+    try:
+        all_claims = extract_all_claims(client, articles)
+    except RuntimeError as e:
+        log.error(str(e))
+        # Write partial output with error flag
+        nm = NarrativeMap(
+            country=country,
+            total_sources=len(articles),
+            sources_fetched=len(fetched),
+            sources_failed=len(failed),
+            generated_at=utc_now_iso(),
+            source_articles=articles,
+        )
+        data = narrative_map_to_dict(nm)
+        data["error"] = str(e)
+        if out_json:
+            ensure_dir(os.path.dirname(out_json) or ".")
+            with open(out_json, "w", encoding="utf-8") as f:
+                json.dump(data, f, ensure_ascii=False, indent=2)
+        return nm
 
     # Step 4-5: Cluster and build narrative map
     nm = cluster_claims(client, all_claims, articles, country)
