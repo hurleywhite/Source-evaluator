@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HRF Narrative Map</title>
+<style>
+  :root {
+    --navy: #1A2332;
+    --slate: #2D3E50;
+    --gold: #D4A843;
+    --light-gold: #E8C876;
+    --off-white: #F5F3EF;
+    --white: #FFFFFF;
+    --body-text: #3A3A3A;
+    --muted: #6B7280;
+    --green: #1B7340;
+    --blue: #3B7CB8;
+    --amber: #C4880B;
+    --red: #B83B3B;
+    --gray: #6B7280;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--off-white);
+    color: var(--body-text);
+    min-height: 100vh;
+  }
+
+  .header {
+    background: var(--navy);
+    border-bottom: 4px solid var(--gold);
+    padding: 1.5rem 2rem;
+  }
+  .header h1 { color: var(--white); font-family: Georgia, serif; font-size: 1.75rem; }
+  .header p { color: var(--light-gold); font-size: 0.9rem; margin-top: 0.25rem; }
+
+  .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+
+  /* Input panel */
+  .input-panel {
+    background: var(--white);
+    border-radius: 8px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    padding: 2rem;
+    margin-bottom: 2rem;
+  }
+  .input-panel h2 {
+    font-family: Georgia, serif;
+    color: var(--navy);
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+  }
+
+  /* Tabs */
+  .tabs { display: flex; gap: 0; margin-bottom: 1.5rem; border-bottom: 2px solid #E5E7EB; }
+  .tab {
+    padding: 0.6rem 1.5rem; cursor: pointer; border: none; background: none;
+    font-size: 0.9rem; color: var(--muted); border-bottom: 3px solid transparent;
+    margin-bottom: -2px; transition: all 0.2s;
+  }
+  .tab.active { color: var(--navy); border-bottom-color: var(--gold); font-weight: 600; }
+  .tab:hover { color: var(--navy); }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  textarea {
+    width: 100%; padding: 0.75rem; border: 1px solid #D1D5DB; border-radius: 6px;
+    font-size: 0.9rem; font-family: 'SF Mono', monospace; resize: vertical; min-height: 150px;
+  }
+  textarea:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px rgba(212,168,67,0.15); }
+
+  label { display: block; font-size: 0.85rem; font-weight: 600; color: var(--navy); margin-bottom: 0.4rem; }
+  .hint { font-size: 0.8rem; color: var(--muted); margin-top: 0.3rem; }
+
+  .form-row { display: flex; gap: 1.5rem; margin-top: 1.25rem; align-items: flex-end; }
+  .form-group { flex: 1; }
+
+  input[type="text"], select {
+    width: 100%; padding: 0.6rem 0.75rem; border: 1px solid #D1D5DB;
+    border-radius: 6px; font-size: 0.9rem; background: var(--white);
+  }
+  input:focus, select:focus { outline: none; border-color: var(--gold); }
+
+  .file-drop {
+    border: 2px dashed #D1D5DB; border-radius: 8px; padding: 2rem;
+    text-align: center; cursor: pointer; transition: all 0.2s;
+  }
+  .file-drop:hover, .file-drop.dragover { border-color: var(--gold); background: rgba(212,168,67,0.05); }
+  .file-drop input { display: none; }
+  .file-drop p { color: var(--muted); font-size: 0.9rem; }
+
+  .btn-run {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    padding: 0.75rem 2rem; background: var(--gold); color: var(--navy);
+    border: none; border-radius: 6px; font-size: 1rem; font-weight: 700;
+    cursor: pointer; margin-top: 1.5rem; transition: all 0.2s;
+  }
+  .btn-run:hover { background: var(--light-gold); }
+  .btn-run:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* Progress */
+  .progress-panel {
+    display: none; background: var(--white); border-radius: 8px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08); padding: 2rem; margin-bottom: 2rem; text-align: center;
+  }
+  .spinner {
+    display: inline-block; width: 24px; height: 24px;
+    border: 3px solid #E5E7EB; border-top-color: var(--gold);
+    border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 0.75rem;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .progress-bar-outer { width: 100%; height: 8px; background: #E5E7EB; border-radius: 4px; margin: 1rem 0; overflow: hidden; }
+  .progress-bar-inner { height: 100%; background: var(--gold); border-radius: 4px; transition: width 0.5s ease; width: 0%; }
+
+  .error-msg { background: #FEE2E2; color: var(--red); padding: 1rem; border-radius: 6px; margin-bottom: 1rem; font-size: 0.9rem; display: none; }
+
+  /* ── Narrative Map Results ── */
+  .narrative-panel { display: none; }
+
+  .map-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 1.5rem;
+  }
+  .map-header h2 { font-family: Georgia, serif; color: var(--navy); font-size: 1.5rem; }
+
+  .map-stats {
+    display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem;
+  }
+  .stat-chip {
+    display: flex; align-items: center; gap: 0.4rem;
+    padding: 0.5rem 1rem; border-radius: 8px; font-size: 0.85rem; font-weight: 600;
+    background: var(--white); box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  }
+  .stat-chip .dot { width: 10px; height: 10px; border-radius: 50%; }
+
+  /* Source tier legend */
+  .tier-legend {
+    display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 2rem;
+    padding: 0.75rem 1rem; background: var(--white); border-radius: 8px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+  .tier-badge {
+    display: inline-flex; align-items: center; gap: 0.3rem;
+    padding: 0.25rem 0.6rem; border-radius: 12px; font-size: 0.75rem; font-weight: 600;
+  }
+  .tier-trusted { background: #D1FAE5; color: var(--green); }
+  .tier-general { background: #DBEAFE; color: var(--blue); }
+  .tier-state { background: #FEF3C7; color: var(--amber); }
+  .tier-propaganda { background: #FEE2E2; color: var(--red); }
+  .tier-unclassified { background: #F3F4F6; color: var(--gray); }
+
+  /* Topic sections */
+  .topic-section {
+    margin-bottom: 2rem;
+  }
+  .topic-header {
+    display: flex; align-items: center; gap: 0.75rem;
+    padding: 1rem 1.25rem;
+    background: var(--navy); color: var(--white);
+    border-radius: 8px 8px 0 0; cursor: pointer;
+  }
+  .topic-header h3 { font-family: Georgia, serif; font-size: 1.15rem; flex: 1; }
+  .topic-count {
+    background: rgba(255,255,255,0.15); padding: 0.2rem 0.6rem;
+    border-radius: 12px; font-size: 0.8rem;
+  }
+  .topic-body { background: var(--white); border-radius: 0 0 8px 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+
+  /* Narrative cluster cards */
+  .cluster-card {
+    padding: 1.25rem; border-bottom: 1px solid #F3F4F6;
+  }
+  .cluster-card:last-child { border-bottom: none; }
+
+  .cluster-header {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    margin-bottom: 0.75rem; cursor: pointer;
+  }
+  .cluster-narrative {
+    font-weight: 600; color: var(--navy); font-size: 1rem; flex: 1;
+  }
+  .cluster-flags { display: flex; gap: 0.4rem; flex-shrink: 0; margin-left: 1rem; }
+  .flag-convergence {
+    background: #D1FAE5; color: var(--green); padding: 0.15rem 0.5rem;
+    border-radius: 10px; font-size: 0.7rem; font-weight: 600;
+  }
+  .flag-low-coverage {
+    background: #FEF3C7; color: var(--amber); padding: 0.15rem 0.5rem;
+    border-radius: 10px; font-size: 0.7rem; font-weight: 600;
+  }
+
+  .cluster-description {
+    color: var(--body-text); font-size: 0.9rem; line-height: 1.5;
+    margin-bottom: 0.75rem;
+  }
+
+  .cluster-sources {
+    display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.75rem;
+  }
+  .source-count-badge {
+    font-size: 0.8rem; font-weight: 600; color: var(--muted);
+    padding: 0.2rem 0.5rem; background: #F3F4F6; border-radius: 8px;
+  }
+
+  .cluster-tier-bar {
+    display: flex; height: 6px; border-radius: 3px; overflow: hidden;
+    margin-bottom: 0.5rem;
+  }
+  .tier-segment { height: 100%; transition: width 0.3s; }
+
+  /* Expandable claims */
+  .cluster-details { display: none; margin-top: 0.75rem; }
+  .cluster-details.open { display: block; }
+
+  .claim-item {
+    padding: 0.5rem 0.75rem; margin-bottom: 0.4rem;
+    border-left: 3px solid #E5E7EB; font-size: 0.85rem;
+    background: #FAFAF8;
+  }
+  .claim-text { color: var(--body-text); }
+  .claim-meta { color: var(--muted); font-size: 0.78rem; margin-top: 0.2rem; }
+  .claim-source-tier {
+    display: inline-block; padding: 0.1rem 0.4rem; border-radius: 6px;
+    font-size: 0.7rem; font-weight: 600;
+  }
+
+  /* Source list panel */
+  .sources-panel {
+    background: var(--white); border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    padding: 1.25rem; margin-top: 2rem;
+  }
+  .sources-panel h3 {
+    font-family: Georgia, serif; color: var(--navy); font-size: 1.1rem;
+    margin-bottom: 1rem; cursor: pointer;
+  }
+  .source-row {
+    display: flex; align-items: center; gap: 0.75rem;
+    padding: 0.4rem 0; border-bottom: 1px solid #F9FAFB; font-size: 0.85rem;
+  }
+  .source-url { flex: 1; font-family: monospace; color: var(--navy); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .source-status { font-size: 0.8rem; color: var(--muted); min-width: 80px; }
+
+  .btn-export {
+    padding: 0.5rem 1rem; background: var(--slate); color: var(--white);
+    border: none; border-radius: 6px; cursor: pointer; font-size: 0.85rem;
+  }
+  .btn-export:hover { background: var(--navy); }
+
+  .expand-icon { font-size: 0.8rem; transition: transform 0.2s; }
+  .expand-icon.open { transform: rotate(90deg); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Narrative Map</h1>
+  <p>Research Aggregation &amp; Narrative Clustering for Human Rights Documentation</p>
+</div>
+
+<div class="container">
+  <!-- Input Panel -->
+  <div class="input-panel" id="inputPanel">
+    <h2>Build Narrative Map</h2>
+
+    <div class="tabs">
+      <button class="tab active" data-tab="paste">Paste Works Cited</button>
+      <button class="tab" data-tab="upload">Upload File</button>
+    </div>
+
+    <div class="tab-content active" id="tab-paste">
+      <label for="sourceText">Works cited entries or URLs (one per line)</label>
+      <textarea id="sourceText" placeholder="Paste full works-cited entries or URLs here...&#10;&#10;The system will extract URLs from each line.&#10;Full citation context helps with source identification."></textarea>
+      <p class="hint">Accepts full works-cited entries (APA, Chicago, etc.) or plain URLs. One source per line.</p>
+    </div>
+
+    <div class="tab-content" id="tab-upload">
+      <div class="file-drop" id="fileDrop">
+        <input type="file" id="fileInput" accept=".txt,.csv">
+        <p style="font-size:2rem;margin-bottom:0.5rem">&#128196;</p>
+        <p>Drop a .txt file here or click to browse</p>
+        <p class="hint" style="margin-top:0.5rem">Text file with works-cited entries or URLs</p>
+      </div>
+      <p class="hint" id="fileUrlCount"></p>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="countryInput">Country / Region</label>
+        <input type="text" id="countryInput" placeholder="e.g., China, Cuba, Americas">
+        <p class="hint">Provides context for narrative clustering</p>
+      </div>
+    </div>
+
+    <button class="btn-run" id="btnRun">
+      <span>&#9654;</span> Build Narrative Map
+    </button>
+  </div>
+
+  <!-- Progress -->
+  <div class="progress-panel" id="progressPanel">
+    <div class="spinner"></div>
+    <h2 style="font-family:Georgia,serif;color:var(--navy);margin-bottom:0.5rem">Building Narrative Map</h2>
+    <p style="font-size:0.9rem;color:var(--muted)" id="progressText">Fetching sources...</p>
+    <div class="progress-bar-outer">
+      <div class="progress-bar-inner" id="progressBar"></div>
+    </div>
+  </div>
+
+  <div class="error-msg" id="errorMsg"></div>
+
+  <!-- Narrative Map Results -->
+  <div class="narrative-panel" id="narrativePanel">
+    <div class="map-header">
+      <h2 id="mapTitle">Narrative Map</h2>
+      <div style="display:flex;gap:0.5rem">
+        <button class="btn-export" id="btnExportJson">Export JSON</button>
+      </div>
+    </div>
+
+    <div class="map-stats" id="mapStats"></div>
+
+    <div class="tier-legend" id="tierLegend"></div>
+
+    <div id="topicsList"></div>
+
+    <!-- Source list (collapsible) -->
+    <div class="sources-panel" id="sourcesPanel">
+      <h3 onclick="toggleSourceList()">
+        <span class="expand-icon" id="sourcesExpand">&#9654;</span>
+        All Sources (<span id="sourceTotal">0</span>)
+      </h3>
+      <div id="sourcesList" style="display:none"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── State ──
+let currentData = null;
+let fileUrls = [];
+
+// ── Tabs ──
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+  });
+});
+
+// ── File upload ──
+const fileDrop = document.getElementById('fileDrop');
+const fileInput = document.getElementById('fileInput');
+fileDrop.addEventListener('click', () => fileInput.click());
+fileDrop.addEventListener('dragover', (e) => { e.preventDefault(); fileDrop.classList.add('dragover'); });
+fileDrop.addEventListener('dragleave', () => fileDrop.classList.remove('dragover'));
+fileDrop.addEventListener('drop', (e) => {
+  e.preventDefault();
+  fileDrop.classList.remove('dragover');
+  if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener('change', () => { if (fileInput.files.length) handleFile(fileInput.files[0]); });
+
+async function handleFile(file) {
+  const text = await file.text();
+  document.getElementById('fileUrlCount').textContent = `Loaded ${file.name} (${text.split('\\n').length} lines)`;
+  // Store raw text for sending to backend
+  fileUrls = text;
+}
+
+// ── Tier helpers ──
+const TIER_CONFIG = {
+  'trusted_international': { label: 'Trusted International', cls: 'tier-trusted', color: '#1B7340' },
+  'general_news':          { label: 'General News',          cls: 'tier-general', color: '#3B7CB8' },
+  'state_media':           { label: 'State Media',           cls: 'tier-state',   color: '#C4880B' },
+  'propaganda':            { label: 'Propaganda',            cls: 'tier-propaganda', color: '#B83B3B' },
+  'unclassified':          { label: 'Unclassified',          cls: 'tier-unclassified', color: '#6B7280' },
+};
+
+function tierInfo(tier) {
+  return TIER_CONFIG[tier] || TIER_CONFIG['unclassified'];
+}
+
+function escHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s || '';
+  return d.innerHTML;
+}
+
+// ── Run pipeline ──
+document.getElementById('btnRun').addEventListener('click', runPipeline);
+
+async function runPipeline() {
+  const activeTab = document.querySelector('.tab.active').dataset.tab;
+  let sourceText = '';
+  if (activeTab === 'paste') {
+    sourceText = document.getElementById('sourceText').value.trim();
+  } else {
+    sourceText = fileUrls;
+  }
+
+  if (!sourceText) {
+    showError('No sources provided. Paste works-cited entries or upload a file.');
+    return;
+  }
+
+  const country = document.getElementById('countryInput').value.trim();
+
+  hideError();
+  document.getElementById('progressPanel').style.display = 'block';
+  document.getElementById('btnRun').disabled = true;
+  document.getElementById('narrativePanel').style.display = 'none';
+  document.getElementById('progressText').textContent = 'Fetching sources and extracting claims...';
+  document.getElementById('progressBar').style.width = '10%';
+
+  try {
+    const formData = new FormData();
+    formData.append('sources', sourceText);
+    formData.append('country', country);
+
+    // Animate progress bar
+    let pct = 10;
+    const progressInterval = setInterval(() => {
+      pct = Math.min(pct + 2, 85);
+      document.getElementById('progressBar').style.width = pct + '%';
+      if (pct > 30) {
+        document.getElementById('progressText').textContent = 'Extracting claims from articles...';
+      }
+      if (pct > 60) {
+        document.getElementById('progressText').textContent = 'Clustering narratives...';
+      }
+    }, 3000);
+
+    const resp = await fetch('/api/narrative', { method: 'POST', body: formData });
+    const data = await resp.json();
+
+    clearInterval(progressInterval);
+    document.getElementById('progressBar').style.width = '100%';
+
+    if (data.error) {
+      showError(data.error);
+      resetUI();
+      return;
+    }
+
+    currentData = data;
+    renderNarrativeMap(data);
+
+    document.getElementById('progressPanel').style.display = 'none';
+    document.getElementById('btnRun').disabled = false;
+
+  } catch (err) {
+    showError('Pipeline failed: ' + err.message);
+    resetUI();
+  }
+}
+
+// ── Render narrative map ──
+function renderNarrativeMap(data) {
+  document.getElementById('narrativePanel').style.display = 'block';
+
+  // Title
+  const title = data.country ? `Narrative Map: ${data.country}` : 'Narrative Map';
+  document.getElementById('mapTitle').textContent = title;
+
+  // Stats
+  document.getElementById('mapStats').innerHTML = `
+    <div class="stat-chip"><strong>${data.total_sources}</strong>&nbsp;Sources</div>
+    <div class="stat-chip"><strong>${data.sources_fetched}</strong>&nbsp;Fetched</div>
+    <div class="stat-chip"><strong>${data.topic_count || 0}</strong>&nbsp;Topics</div>
+    <div class="stat-chip"><strong>${data.cluster_count || 0}</strong>&nbsp;Narrative Threads</div>
+    ${data.sources_failed > 0 ? `<div class="stat-chip" style="color:var(--amber)"><strong>${data.sources_failed}</strong>&nbsp;Failed</div>` : ''}
+  `;
+
+  // Tier legend
+  const tierCounts = {};
+  (data.sources || []).forEach(s => {
+    const t = s.tier || 'unclassified';
+    tierCounts[t] = (tierCounts[t] || 0) + 1;
+  });
+  document.getElementById('tierLegend').innerHTML = Object.entries(tierCounts)
+    .sort((a, b) => b[1] - a[1])
+    .map(([tier, count]) => {
+      const info = tierInfo(tier);
+      return `<span class="tier-badge ${info.cls}">${info.label}: ${count}</span>`;
+    }).join('');
+
+  // Topics
+  const topicsList = document.getElementById('topicsList');
+  topicsList.innerHTML = '';
+
+  if (!data.topics || Object.keys(data.topics).length === 0) {
+    topicsList.innerHTML = '<p style="color:var(--muted);text-align:center;padding:2rem">No narrative clusters generated. Ensure sources have fetchable content.</p>';
+    return;
+  }
+
+  Object.entries(data.topics).forEach(([topic, clusters]) => {
+    const section = document.createElement('div');
+    section.className = 'topic-section';
+    section.innerHTML = `
+      <div class="topic-header" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'none' ? 'block' : 'none'">
+        <h3>${escHtml(topic)}</h3>
+        <span class="topic-count">${clusters.length} thread${clusters.length !== 1 ? 's' : ''}</span>
+      </div>
+      <div class="topic-body">
+        ${clusters.map((c, ci) => renderCluster(c, topic, ci)).join('')}
+      </div>
+    `;
+    topicsList.appendChild(section);
+  });
+
+  // Sources list
+  document.getElementById('sourceTotal').textContent = (data.sources || []).length;
+  const sourcesList = document.getElementById('sourcesList');
+  sourcesList.innerHTML = (data.sources || []).map(s => {
+    const info = tierInfo(s.tier);
+    const status = s.fetch_status === 'ok' ? 'OK' : s.fetch_status;
+    return `<div class="source-row">
+      <span class="tier-badge ${info.cls}" style="font-size:0.7rem">${info.label}</span>
+      <span class="source-url" title="${escHtml(s.url)}">${escHtml(s.url)}</span>
+      <span class="source-status">${status} | ${s.text_length || 0} chars</span>
+    </div>`;
+  }).join('');
+}
+
+function renderCluster(cluster, topic, idx) {
+  const claims = cluster.claims || [];
+  const tierBreakdown = cluster.tier_breakdown || {};
+  const totalClaims = claims.length;
+
+  // Tier bar segments
+  const totalTier = Object.values(tierBreakdown).reduce((a, b) => a + b, 0) || 1;
+  const tierBar = Object.entries(tierBreakdown).map(([tier, count]) => {
+    // tier labels are display labels, need to map back
+    const tierKey = Object.entries(TIER_CONFIG).find(([k, v]) => v.label === tier)?.[0] || 'unclassified';
+    const info = tierInfo(tierKey);
+    const pct = (count / totalTier * 100).toFixed(1);
+    return `<div class="tier-segment" style="width:${pct}%;background:${info.color}" title="${tier}: ${count}"></div>`;
+  }).join('');
+
+  // Flags
+  let flags = '';
+  if (cluster.convergence_signal === 'cross_tier_convergence') {
+    flags += '<span class="flag-convergence">Cross-tier convergence</span>';
+  }
+  if (cluster.coverage_flag === 'low_independent_coverage') {
+    flags += '<span class="flag-low-coverage">Low independent coverage</span>';
+  }
+
+  const clusterId = `cluster-${topic.replace(/\s+/g, '-')}-${idx}`;
+
+  return `<div class="cluster-card">
+    <div class="cluster-header" onclick="toggleCluster('${clusterId}')">
+      <div>
+        <div class="cluster-narrative">${escHtml(cluster.narrative)}</div>
+      </div>
+      <div class="cluster-flags">
+        ${flags}
+        <span class="source-count-badge">${cluster.source_count} source${cluster.source_count !== 1 ? 's' : ''} | ${totalClaims} claim${totalClaims !== 1 ? 's' : ''}</span>
+      </div>
+    </div>
+    <div class="cluster-description">${escHtml(cluster.description)}</div>
+    <div class="cluster-tier-bar">${tierBar}</div>
+    <div style="display:flex;gap:0.4rem;flex-wrap:wrap;margin-bottom:0.5rem">
+      ${Object.entries(tierBreakdown).map(([tier, count]) => {
+        const tierKey = Object.entries(TIER_CONFIG).find(([k, v]) => v.label === tier)?.[0] || 'unclassified';
+        const info = tierInfo(tierKey);
+        return `<span class="tier-badge ${info.cls}" style="font-size:0.7rem">${tier}: ${count}</span>`;
+      }).join('')}
+    </div>
+    <div class="cluster-details" id="${clusterId}">
+      ${claims.map(cl => {
+        const clTierKey = Object.entries(TIER_CONFIG).find(([k, v]) => v.label === (cl.source_tier || ''))?.[0] || cl.source_tier || 'unclassified';
+        const clInfo = tierInfo(clTierKey);
+        return `<div class="claim-item" style="border-left-color:${clInfo.color}">
+          <div class="claim-text">${escHtml(cl.text)}</div>
+          <div class="claim-meta">
+            <span class="claim-source-tier ${clInfo.cls}">${clInfo.label}</span>
+            ${cl.source_domain || ''} ${cl.date_reference ? '| ' + escHtml(cl.date_reference) : ''}
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+    <div style="text-align:center;margin-top:0.5rem">
+      <button onclick="toggleCluster('${clusterId}')" style="border:none;background:none;color:var(--blue);cursor:pointer;font-size:0.8rem">
+        Show/hide ${totalClaims} claim${totalClaims !== 1 ? 's' : ''}
+      </button>
+    </div>
+  </div>`;
+}
+
+// ── Toggle helpers ──
+window.toggleCluster = (id) => {
+  document.getElementById(id).classList.toggle('open');
+};
+
+window.toggleSourceList = () => {
+  const list = document.getElementById('sourcesList');
+  const icon = document.getElementById('sourcesExpand');
+  if (list.style.display === 'none') {
+    list.style.display = 'block';
+    icon.classList.add('open');
+  } else {
+    list.style.display = 'none';
+    icon.classList.remove('open');
+  }
+};
+
+// ── Export ──
+document.getElementById('btnExportJson').addEventListener('click', () => {
+  if (!currentData) return;
+  const blob = new Blob([JSON.stringify(currentData, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `narrative_map_${currentData.country || 'report'}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+// ── Helpers ──
+function showError(msg) { const el = document.getElementById('errorMsg'); el.textContent = msg; el.style.display = 'block'; }
+function hideError() { document.getElementById('errorMsg').style.display = 'none'; }
+function resetUI() {
+  document.getElementById('progressPanel').style.display = 'none';
+  document.getElementById('btnRun').disabled = false;
+}
+</script>
+</body>
+</html>

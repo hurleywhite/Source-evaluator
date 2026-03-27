@@ -1,12 +1,14 @@
 """
 Source Evaluator Web Interface
-FastAPI backend wrapping source_eval_v6.py via subprocess
+FastAPI backend serving:
+  - v6 Source Evaluator (legacy, per-source verdicts)
+  - v7 Narrative Map (new, narrative clustering)
 
 Supports two modes:
 - Synchronous (Vercel serverless): POST /api/evaluate returns results directly
 - Async (local/Railway): POST /api/evaluate-async starts a background job
 """
-import json, asyncio, uuid, time, subprocess, tempfile, os, sys, shutil
+import json, asyncio, uuid, time, subprocess, tempfile, os, sys, shutil, re
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -18,13 +20,15 @@ from fastapi.responses import HTMLResponse, JSONResponse
 app = FastAPI(title="HRF Source Evaluator")
 
 PROJECT_DIR = Path(__file__).parent
-SCRIPT = PROJECT_DIR / "v6-v10" / "source_eval_v6.py"
+SCRIPT_V6 = PROJECT_DIR / "v6-v10" / "source_eval_v6.py"
+SCRIPT_V7 = PROJECT_DIR / "v6-v10" / "source_eval_v7.py"
 
 # Detect if running on Vercel (serverless) vs local/Railway (server)
 IS_VERCEL = os.environ.get("VERCEL", "") == "1"
 
 # On Vercel, only /tmp is writable; locally use project dir
 CACHE_DIR = Path("/tmp/.cache_web_eval") if IS_VERCEL else PROJECT_DIR / ".cache_web_eval"
+CACHE_DIR_V7 = Path("/tmp/.cache_narrative") if IS_VERCEL else PROJECT_DIR / ".cache_narrative"
 
 # Find Python: use local venv if available, otherwise system python
 _venv_python = PROJECT_DIR / ".venv312" / "bin" / "python3"
@@ -37,11 +41,134 @@ VERCEL_MAX_URLS = 10
 jobs: dict = {}
 
 
+# =============================================================================
+# Routes — Serve HTML pages
+# =============================================================================
+
 @app.get("/", response_class=HTMLResponse)
 async def index():
+    """Serve the narrative map UI (new default)."""
+    html_path = PROJECT_DIR / "templates" / "narrative.html"
+    return HTMLResponse(html_path.read_text())
+
+
+@app.get("/legacy", response_class=HTMLResponse)
+async def legacy_index():
+    """Serve the legacy v6 source evaluator UI."""
     html_path = PROJECT_DIR / "templates" / "index.html"
     return HTMLResponse(html_path.read_text())
 
+
+# =============================================================================
+# v7 Narrative Map API
+# =============================================================================
+
+def _extract_urls_from_text(text: str) -> list:
+    """Extract URLs from works-cited text or plain URL list."""
+    urls = []
+    for line in text.split("\n"):
+        # Find URLs in each line (works-cited entries have URLs embedded)
+        found = re.findall(r'(https?://[^\s,;"<>\)]+)', line)
+        for u in found:
+            # Clean trailing punctuation
+            u = u.rstrip(".")
+            if u not in urls:
+                urls.append(u)
+    return urls
+
+
+def _run_narrative_sync(source_text: str, country: str) -> dict:
+    """Run v7 narrative pipeline synchronously via subprocess."""
+    tmp = None
+    out_json = None
+    out_md = None
+    try:
+        # Write source text to temp file
+        tmp = tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False, encoding="utf-8")
+        tmp.write(source_text)
+        tmp.close()
+
+        out_json = tempfile.mktemp(suffix=".json")
+        out_md = tempfile.mktemp(suffix=".md")
+
+        if IS_VERCEL:
+            sleep_s, timeout_s = "0", "10"
+        else:
+            sleep_s, timeout_s = "0.3", "25"
+
+        cmd = [
+            str(PYTHON), str(SCRIPT_V7),
+            "--works-cited", tmp.name,
+            "--cache-dir", str(CACHE_DIR_V7),
+            "--out-json", out_json,
+            "--out-md", out_md,
+            "--sleep-s", sleep_s,
+            "--timeout-s", timeout_s,
+        ]
+        if country:
+            cmd.extend(["--country", country])
+
+        env = os.environ.copy()
+        if IS_VERCEL:
+            env["TLDEXTRACT_CACHE"] = "/tmp/.tldextract_cache"
+
+        result = subprocess.run(
+            cmd,
+            cwd=str(PROJECT_DIR),
+            capture_output=True,
+            text=True,
+            timeout=600,  # 10 min max for narrative pipeline
+            env=env,
+        )
+
+        if os.path.exists(out_json):
+            with open(out_json, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            return {**data, "error": None}
+        else:
+            stderr = result.stderr[:2000] if result.stderr else "No output"
+            stdout = result.stdout[:2000] if result.stdout else ""
+            return {"error": f"Pipeline failed: {stderr}\n{stdout}".strip()}
+
+    except subprocess.TimeoutExpired:
+        return {"error": "Pipeline timed out (10 min limit)"}
+    except Exception as e:
+        return {"error": str(e)}
+    finally:
+        for f in [tmp.name if tmp else None, out_json, out_md]:
+            if f:
+                try:
+                    os.unlink(f)
+                except OSError:
+                    pass
+
+
+@app.post("/api/narrative")
+async def narrative_map(
+    sources: str = Form(...),
+    country: str = Form(""),
+):
+    """Run the v7 narrative clustering pipeline.
+    Accepts works-cited text or plain URLs.
+    """
+    if not sources.strip():
+        return JSONResponse({"error": "No sources provided"}, status_code=400)
+
+    # Run synchronously in executor
+    loop = asyncio.get_event_loop()
+    result = await loop.run_in_executor(
+        None, _run_narrative_sync, sources, country
+    )
+
+    if result.get("error"):
+        return JSONResponse(result, status_code=500)
+
+    return result
+
+
+# =============================================================================
+# v6 Legacy Source Evaluator API (kept for backwards compatibility)
+# =============================================================================
 
 def _run_evaluation_sync(urls: list, intended_use: str, use_llm: bool) -> dict:
     """
@@ -62,15 +189,13 @@ def _run_evaluation_sync(urls: list, intended_use: str, use_llm: bool) -> dict:
         out_json = tempfile.mktemp(suffix=".json")
         out_md = tempfile.mktemp(suffix=".md")
 
-        # Faster settings for Vercel (no inter-request sleep, shorter timeouts,
-        # fewer auxiliary pages). Local mode keeps the polite defaults.
         if IS_VERCEL:
             sleep_s, timeout_s, max_aux = "0", "10", "2"
         else:
             sleep_s, timeout_s, max_aux = "0.5", "25", "3"
 
         cmd = [
-            str(PYTHON), str(SCRIPT),
+            str(PYTHON), str(SCRIPT_V6),
             "--works-cited", tmp.name,
             "--intended-use", intended_use.upper(),
             "--cache-dir", str(CACHE_DIR),
@@ -83,7 +208,6 @@ def _run_evaluation_sync(urls: list, intended_use: str, use_llm: bool) -> dict:
         if not use_llm:
             cmd.append("--no-llm")
 
-        # Set env vars — on Vercel, redirect tldextract cache to /tmp
         env = os.environ.copy()
         if IS_VERCEL:
             env["TLDEXTRACT_CACHE"] = "/tmp/.tldextract_cache"
@@ -114,7 +238,6 @@ def _run_evaluation_sync(urls: list, intended_use: str, use_llm: bool) -> dict:
     except Exception as e:
         return {"results": [], "error": str(e)}
     finally:
-        # Cleanup temp files
         for f in [tmp.name if tmp else None, out_json, out_md]:
             if f:
                 try:
@@ -129,10 +252,7 @@ async def evaluate(
     intended_use: str = Form("A"),
     use_llm: bool = Form(True),
 ):
-    """
-    Synchronous evaluation endpoint (works on Vercel serverless).
-    Blocks until evaluation completes and returns results directly.
-    """
+    """Legacy v6 evaluation endpoint."""
     url_list = [u.strip() for u in urls.replace(",", "\n").split("\n") if u.strip()]
     url_list = [u for u in url_list if u.startswith("http")]
 
@@ -147,7 +267,6 @@ async def evaluate(
             status_code=400
         )
 
-    # Run synchronously — blocks until done
     loop = asyncio.get_event_loop()
     result = await loop.run_in_executor(
         None, _run_evaluation_sync, url_list, intended_use, use_llm
@@ -171,7 +290,7 @@ async def evaluate(
     }
 
 
-# ── Legacy async endpoints (for local/Railway — NOT used on Vercel) ──
+# ── Legacy async endpoints (for local/Railway) ──
 
 @app.post("/api/evaluate-async")
 async def start_evaluation_async(
@@ -179,7 +298,6 @@ async def start_evaluation_async(
     intended_use: str = Form("A"),
     use_llm: bool = Form(True),
 ):
-    """Start a source evaluation job asynchronously. Returns job_id immediately."""
     url_list = [u.strip() for u in urls.replace(",", "\n").split("\n") if u.strip()]
     url_list = [u for u in url_list if u.startswith("http")]
 
@@ -206,7 +324,6 @@ async def start_evaluation_async(
 
 
 def _run_evaluation_job(job_id: str, urls: list, intended_use: str, use_llm: bool):
-    """Background job runner for async mode."""
     result = _run_evaluation_sync(urls, intended_use, use_llm)
     if result["error"]:
         jobs[job_id]["status"] = "error"
@@ -254,6 +371,7 @@ async def upload_file(file: UploadFile = File(...)):
 
 if __name__ == "__main__":
     import uvicorn
-    print("\n  Source Evaluator Web Interface")
-    print(f"  Open http://localhost:8000 in your browser\n")
+    print("\n  HRF Source Evaluator & Narrative Map")
+    print(f"  Narrative Map:    http://localhost:8000")
+    print(f"  Legacy Evaluator: http://localhost:8000/legacy\n")
     uvicorn.run(app, host="0.0.0.0", port=8000)
